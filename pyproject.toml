@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discussion-helper"
+version = "0.1.0"
+description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Warith HARCHAOUI", email = "warithmetics@deraison.ai" }]
+keywords = [
+    "voice-agent", "conversation", "speech", "barge-in", "turn-taking",
+    "full-duplex", "realtime", "local-first", "stt", "tts",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Runtime contract: the base install has no model, no microphone and no sound
+# card in it. It carries the loop — the floor, the interruption, the timings —
+# and the three protocols the loop is written against. That is deliberate: it
+# is what lets the hard part be tested in CI, and what lets somebody bring
+# their own recogniser without uninstalling ours.
+dependencies = [
+    "os-helper>=1.7.2",
+]
+
+[project.optional-dependencies]
+# Hearing. vocal-helper brings Silero VAD, semantic end-of-turn detection and
+# whisper.cpp; capture-helper brings the microphone it listens to.
+listen = ["vocal-helper>=0.4.4", "capture-helper>=0.3.0"]
+# Speaking, in this process. Kokoro, no server.
+speak = ["speaker-helper[kokoro,detect]>=0.8.0"]
+# Answering, with whatever model fits this machine.
+think = ["best-engine-ai-helper>=0.4.0"]
+# Playing the audio out. Separate from `speak` because a caller that pipes the
+# audio somewhere else — a phone line, a browser — needs the voice and not the
+# sound card.
+play = ["sounddevice>=0.4", "numpy>=1.24"]
+all = ["discussion-helper[listen,speak,think,play]"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6", "mypy>=1.11"]
+
+[project.scripts]
+discussion-helper = "discussion_helper.cli_click:main"
+discussion-helper-argparse = "discussion_helper.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/warith-harchaoui/discussion-helper"
+Issues = "https://github.com/warith-harchaoui/discussion-helper/issues"
+
+[tool.setuptools.packages.find]
+include = ["discussion_helper*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
