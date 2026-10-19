@@ -1,0 +1,114 @@
+# Paysage
+
+🇫🇷 Français · [🇬🇧 LANDSCAPE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/LANDSCAPE.md)
+
+Outils voisins ou concurrents dans l'espace « tenir une conversation parlée, en
+temps réel, là où savoir à qui est le tour compte », comparés à
+`discussion-helper`. Les notes vont de ⭐ (1) à ⭐⭐⭐⭐⭐ (5), évaluées
+par rapport au travail que `discussion-helper` se donne : une boucle de
+conversation **en forme de bibliothèque**, **locale d'abord**, dont le
+comportement d'interruption est **juste et observable**, qui se compose avec le
+reste de la pile AI Helpers (`vocal-helper`, `speaker-helper`,
+`best-engine-ai-helper`). Un projet optimisé pour un tout autre travail — une
+plateforme de téléphonie portant dix mille appels simultanés, par exemple —
+n'est pas pénalisé ; la note reflète seulement l'adéquation à *cette* niche.
+
+La dernière colonne est là exprès. `discussion-helper` y obtient ⭐ et serait
+un mauvais choix pour un centre d'appels. Une table où le meneur gagne toutes
+les colonnes est un tableau d'honneur, pas un paysage.
+
+## En un coup d'œil
+
+<!-- TABLE:START -->
+<!-- TABLE:END -->
+
+## Carte de positionnement
+
+<!-- FIGURE:START -->
+<!-- FIGURE:END -->
+
+## Positionnement
+
+Trois paquets faisaient déjà le travail avant celui-ci. `vocal-helper` entend,
+`speaker-helper` parle, un modèle local répond. **Aucun ne sait à qui est le
+tour.** Ce manque — ni entendre ni parler — constitue tout
+`discussion-helper`. Il ne fait délibérément *aucune* détection de tour qui lui
+soit propre : `vocal-helper` embarque Silero VAD ainsi qu'une étape de fin de
+tour sémantique calquée sur le `turn-detector` de LiveKit ; réimplémenter
+l'une ou l'autre ici lui donnerait deux propriétaires.
+
+Ce qu'il ajoute, c'est le tour de parole : quatre états, un seul détenteur à la
+fois, plus la règle que `THINKING` s'interrompt autrement que `SPEAKING` — penser
+peut s'abandonner en silence, parler doit s'*arrêter* et l'audio en attente
+être jeté. Cette dernière clause est le vrai point distinctif de la table
+ci-dessus. Une réponse est synthétisée en avance sur la lecture, donc une
+interruption trouve toujours de l'audio fabriqué et pas encore entendu ; le
+jouer quand même — parce qu'il existe, parce qu'il a été payé — est exactement
+ce qui fait qu'un agent paraît sourd. Vider la file au lieu de la jeter est la
+manière la plus courante de se tromper ici ; elle est invisible dans une
+transcription : le texte d'une réponse interrompue a l'air complet.
+
+Le deuxième point distinctif : rien de tout cela ne réclame une pièce.
+`Listener`, `Responder` et `Voice` sont des protocoles structurels livrés avec
+leurs doublures, si bien que la logique du tour de parole, l'interruption et la
+comptabilité de latence tournent en intégration continue sans micro, sans
+modèle ni carte son. Le comportement le plus difficile à réussir dans un agent
+vocal est aussi le plus difficile à *entendre* : l'audio s'est-il vraiment
+arrêté, la file a-t-elle été jetée, le tour est-il revenu. Un test à voix réelle
+n'observe rien de cela.
+
+Troisièmement, la décomposition de latence se fait par étape plutôt qu'en
+total ; elle nomme le `slowest_stage`. Un chiffre unique dit qu'une
+conversation paraît lente sans rien dire du pourquoi. Le temps jusqu'au premier
+son et la lecture sont rapportés séparément, car les confondre fait paraître un
+moteur rapide lisant une longue phrase plus lent qu'un moteur lent lisant une
+phrase courte.
+
+Chaque alternative porte des nuances que les étoiles compriment. **LiveKit
+Agents** est l'implémentation de référence de cette catégorie et fait mieux que
+ce paquet sur presque tout ce qui n'est pas ci-dessus : transport WebRTC,
+téléphonie SIP, un détecteur de tour *entraîné* plutôt qu'un seuil de VAD, et
+une vraie montée en charge horizontale. Il a toutefois la forme d'un cadriciel
+— on déploie un ouvrier, on n'importe pas une boucle — et son chemin
+confortable passe par des fournisseurs en nuage. **Pipecat** est aussi capable
+et plus riche en intégrations, bâti comme un pipeline de processeurs de trames ;
+il accepte les modèles locaux mais l'unité de composition reste le pipeline,
+pas un protocole qu'on implémente en une classe. **L'API Realtime d'OpenAI** a
+le meilleur comportement d'interruption de la table ainsi que la plus faible
+latence, parce que le VAD, le modèle et la voix forment un seul système côté
+serveur — et elle est aussi entièrement en nuage, n'offre presque aucune
+décomposition du temps passé ; elle ne s'exerce pas sans l'API. **Vocode** est le
+plus proche en forme de ce paquet, libre et Python d'abord, avec la téléphonie
+via Twilio, mais son interruption et son observabilité sont plus minces.
+**Vapi** est une plateforme hébergée : excellent délai jusqu'à la première
+démonstration, de la configuration plutôt que du code. **Amazon Lex** relève
+d'une génération antérieure — intentions et créneaux, téléphonie d'abord via
+Connect, interruption en réglage plutôt qu'en conception. **Rasa** fait de la
+gestion de dialogue, texte d'abord ; elle le fait vraiment bien ; la voix y est un
+connecteur ; le tour de parole n'est pas son problème.
+**`speech_recognition` + `pyttsx3`** est la base bricolée que tout le monde
+essaie en premier : locale, trivialement en forme de bibliothèque, bloquante
+de bout en bout, donc l'utilisateur ne peut pas interrompre du tout.
+
+## Quoi choisir quand
+
+- **`discussion-helper`** : une personne, une machine, une conversation qui
+  doit s'arrêter quand elle coupe — et l'envie de lire pourquoi c'était lent.
+  Se compose avec le reste de la suite AI Helpers.
+- **LiveKit Agents** : il faut WebRTC ou la téléphonie, beaucoup de sessions
+  simultanées, voire un détecteur de tour entraîné plutôt qu'un seuil de VAD. La
+  bonne réponse à l'échelle.
+- **Pipecat** : on veut un pipeline riche avec beaucoup d'intégrations prêtes
+  et composer des processeurs ne dérange pas.
+- **API Realtime d'OpenAI** : la latence la plus basse l'emporte et le nuage
+  est acceptable. Parole à parole en un saut, interruption gérée côté serveur.
+- **Vocode** : un agent vocal libre en Python avec téléphonie Twilio, sans
+  besoin de la comptabilité du tour de parole.
+- **Vapi** : on veut un agent vocal qui marche cet après-midi et on préfère
+  configurer que construire.
+- **Amazon Lex** : on est déjà dans AWS Connect et on pense en intentions et
+  créneaux.
+- **Rasa** : la partie difficile est la *gestion de dialogue*, pas le tour de
+  parole ; l'essentiel du trafic est du texte.
+- **`speech_recognition` + `pyttsx3`** : une démonstration où personne
+  n'interrompra.

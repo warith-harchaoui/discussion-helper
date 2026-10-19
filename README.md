@@ -177,6 +177,16 @@ feels broken, the largest line in that budget is endpointing rather than the
 model, and the agent's own voice reaching its own microphone looks exactly
 like the user speaking.
 
+## The rest of the documentation
+
+| File | What is in it |
+|---|---|
+| **[EXAMPLES.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/EXAMPLES.md)** | A cookbook. Every Python block runs on a bare install — no microphone, no model, no sound card — because the parts are protocols with shipped fakes. |
+| **[KNOWLEDGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md)** | The design notebook, above. |
+| **[LANDSCAPE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/LANDSCAPE.md)** / **[PAYSAGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/PAYSAGE.md)** | Where this sits against LiveKit Agents, Pipecat, OpenAI's Realtime API and six others, with a positioning map. It scores ⭐ on telephony and scale, which is the honest answer. |
+| **[TRIGGERS.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/TRIGGERS.md)** | The exhaustive catalogue of what should, and should not, reach for this helper. Mirrored into the agent skill, with a gate that fails when the two drift apart. |
+| **[CHANGELOG.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/CHANGELOG.md)** | What changed, and why. |
+
 ## How this differs from its neighbours
 
 | You have | Reach for |

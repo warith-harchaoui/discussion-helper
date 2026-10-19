@@ -1,0 +1,10 @@
+Spoken Conversation,Runs locally,Barge-in discards queued audio,Per-stage latency breakdown,Library-shaped,Testable with no hardware,Swappable parts,Telephony and scale
+discussion-helper,5,5,5,5,5,5,1
+LiveKit Agents,3,5,4,3,3,5,5
+Pipecat,3,4,3,4,3,5,5
+OpenAI Realtime API,1,5,2,3,1,1,4
+Vocode,3,3,2,4,2,4,4
+Vapi,1,4,2,1,1,2,5
+Amazon Lex,1,2,1,1,1,1,5
+Rasa,4,1,1,3,4,3,3
+speech_recognition + pyttsx3,5,1,1,5,2,3,1
