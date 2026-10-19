@@ -1,5 +1,58 @@
 # Changelog: discussion-helper
 
+## v0.2.0 (2026-10-19): the microphone was never connected
+
+Joining the AI Helpers suite, and the audit that came with it found that the
+package's two headline promises — hear the user, stop when they cut in — were
+both inert on the only path that uses a real microphone.
+
+### Fixed
+
+- **`VocalListener` now builds the pipeline it always claimed to.** It was
+  consuming `voh.sources.from_microphone` directly: the *raw PCM source*, not
+  the pipeline, so no VAD, no recogniser, no turn boundaries. It then looked
+  for a transcript on frames that carry none.
+
+  What made it invisible rather than noisy: `PcmFrame` is a `TypedDict`, so at
+  runtime it is a plain `dict`, and `getattr(frame, "text", "")` cannot raise
+  on a dict — it answers `""` forever. The loop skipped every frame and the
+  listener yielded nothing at all, with no exception and no log line. The
+  class docstring described the correct architecture the whole time; only the
+  body never built it. Every field is read by subscript now, so a renamed key
+  fails loudly.
+
+- **Barge-in from a real microphone never fired.** Same cause, same silence:
+  `getattr(frame, "is_speech", False)` was permanently `False`. The published
+  bar is 150 ms from the first syllable to silence, and the pipeline cannot
+  answer that — its earliest event is a `VoicedSegment`, emitted when speech
+  *ends*, after 300 ms of trailing silence and before the recogniser runs. So
+  the onset is now read off the raw frames as they pass: one 20 ms frame of
+  latency, on level rather than Silero, because vocal-helper exposes no public
+  single-frame probe and a second VAD would double the cost of the first. The
+  new `onset_rms` knob tunes it; `Policy.barge_in_grace_s` already existed to
+  absorb exactly this kind of detector hearing the agent's own first syllable.
+
+- **Three tests on the microphone path, which had none.** They run with no
+  microphone, against a `vocal_helper` stand-in shaped like the real one in
+  the way that mattered — events are dicts. Two of them fail against v0.1.0:
+  one finds nothing yielded, the other times out waiting for the interruption.
+
+- **`tomllib` on Python 3.10.** The package declares `>=3.10` and the
+  console-script guard imported `tomllib`, which is stdlib only from 3.11.
+  Skipping it there was the easy fix and the wrong one — that guard is what
+  caught a `discussion-helper-mcp` script pointing at a module nobody had
+  written — so it falls back to `tomli` and keeps running on the oldest Python
+  we claim to support.
+
+### Changed
+
+- **Dependency floors now name versions this package has actually run on.**
+  `vocal-helper` was pinned `>=0.4.4`, two major boundaries below the 2.x it
+  is written against; `best-engine-ai-helper` `>=0.4.0`, below the 1.0 line
+  entirely. Both are corrected and capped, as are `capture-helper` and
+  `speaker-helper`, and `os-helper` moves from `>=1.7.2` to the suite's
+  `>=2.0.0,<3`.
+
 ## v0.1.0 (2026-10-18): the loop, and the two numbers it has to hit
 
 `vocal-helper` hears, `speaker-helper` speaks, a local model answers — and

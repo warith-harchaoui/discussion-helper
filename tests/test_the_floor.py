@@ -353,7 +353,16 @@ def test_every_declared_command_points_at_something_importable() -> None:
     import importlib
     from pathlib import Path
 
-    import tomllib
+    try:
+        import tomllib  # stdlib from 3.11 (PEP 680)
+    except ModuleNotFoundError:  # pragma: no cover - only on 3.10
+        # This package declares `requires-python = ">=3.10"`, and on 3.10 a bare
+        # `import tomllib` makes this test error out. Skipping it there would be
+        # the easy fix and the wrong one: this is the guard that caught the
+        # `discussion-helper-mcp` script pointing at a module nobody had written,
+        # so it has to run on the oldest Python we claim to support, not just the
+        # convenient ones. `tomli` is the same parser under its pre-stdlib name.
+        import tomli as tomllib
 
     root = Path(__file__).resolve().parent.parent
     manifest = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
@@ -361,3 +370,139 @@ def test_every_declared_command_points_at_something_importable() -> None:
         module_name, _, attribute = target.partition(":")
         module = importlib.import_module(module_name)
         assert hasattr(module, attribute), f"{command} points at {target}"
+
+
+# ── The microphone path, without a microphone ──────────────────────────────
+
+
+def _fake_vocal_helper():
+    """A stand-in for ``vocal_helper`` shaped like the real one.
+
+    Shaped like it in the one way that matters here: every event is a
+    ``TypedDict``, so at runtime it is a plain ``dict`` with no attributes.
+    That is what let the real listener read ``.text`` off a PCM frame for as
+    long as it did — ``getattr(frame, "text", "")`` cannot raise on a dict, it
+    just answers ``""``.
+    """
+    import types
+
+    import numpy as np
+
+    sources = types.SimpleNamespace()
+
+    async def from_microphone(*, device_name=None, device_index=None):
+        # One quiet frame, then a loud one: enough to tell an onset tap that
+        # fires on level from one that fires on anything.
+        yield {"t0": 0.00, "sample_rate": 16_000, "pcm": np.zeros(320, np.float32)}
+        yield {"t0": 0.02, "sample_rate": 16_000, "pcm": np.full(320, 0.5, np.float32)}
+
+    sources.from_microphone = from_microphone
+
+    class PipelineConfig:
+        def __init__(self, **kw):
+            self.kw = kw
+
+    class Pipeline:
+        """Drains the source — so the onset tap really runs — then speaks."""
+
+        def __init__(self, *, source, config):
+            self.source, self.config = source, config
+
+        async def run(self):
+            async for _frame in self.source():
+                pass
+            yield {"t0": 0.02, "t1": 0.40, "speaker": "S1", "text": "bonjour"}
+
+    module = types.ModuleType("vocal_helper")
+    module.sources = sources
+    module.Pipeline = Pipeline
+    module.PipelineConfig = PipelineConfig
+    return module
+
+
+async def test_the_listener_yields_what_the_pipeline_recognised(monkeypatch) -> None:
+    """The regression that no microphone test could ever have caught.
+
+    Before this, ``utterances()`` consumed ``sources.from_microphone``
+    directly — the raw PCM source, not the pipeline — and looked for a
+    transcript on frames that carry none. It therefore yielded nothing, ever,
+    and raised nothing either: the agent simply never heard anybody. The one
+    assertion that matters is that a turn comes out at all.
+    """
+    import sys
+
+    monkeypatch.setitem(sys.modules, "vocal_helper", _fake_vocal_helper())
+    from discussion_helper.adapters import VocalListener
+
+    heard = [u async for u in VocalListener().utterances()]
+    assert [(u.speaker, u.text) for u in heard] == [("user", "bonjour")]
+    # Timestamps come from the event, not from a wall clock, or the transcript
+    # cannot be lined up against the audio afterwards.
+    assert (heard[0].started_s, heard[0].ended_s) == (0.02, 0.40)
+
+
+async def test_a_loud_frame_releases_the_barge_in_wait(monkeypatch) -> None:
+    """``speech_started`` has to answer from the frames, not from the output.
+
+    The pipeline's earliest event arrives after Silero's trailing-silence
+    window; waiting for it would blow the 150 ms bar pinned above by a wide
+    margin.
+    """
+    import asyncio
+    import sys
+
+    monkeypatch.setitem(sys.modules, "vocal_helper", _fake_vocal_helper())
+    from discussion_helper.adapters import VocalListener
+
+    listener = VocalListener()
+    waiting = asyncio.ensure_future(listener.speech_started())
+    await asyncio.sleep(0)
+    _ = [u async for u in listener.utterances()]
+    await asyncio.wait_for(waiting, timeout=1.0)
+
+
+async def test_a_quiet_room_does_not_look_like_speech(monkeypatch) -> None:
+    """Otherwise the agent interrupts itself on the first frame of silence."""
+    import sys
+
+    module = _fake_vocal_helper()
+
+    async def only_silence(*, device_name=None, device_index=None):
+        import numpy as np
+
+        for i in range(5):
+            yield {
+                "t0": i * 0.02,
+                "sample_rate": 16_000,
+                "pcm": np.zeros(320, np.float32),
+            }
+
+    module.sources.from_microphone = only_silence
+    monkeypatch.setitem(sys.modules, "vocal_helper", module)
+    from discussion_helper.adapters import VocalListener
+
+    listener = VocalListener()
+    _ = [u async for u in listener.utterances()]
+    assert not listener._speech.is_set()
+
+
+def test_the_two_declared_versions_agree() -> None:
+    """`pyproject.toml` and `__version__` are both hand-written.
+
+    Which is one copy too many: the wheel takes its version from the manifest
+    and every `--version` flag takes it from the module, so a bump applied to
+    one and not the other ships a package that misreports itself. Cheap to
+    check, and nothing else would notice.
+    """
+    from pathlib import Path
+
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # pragma: no cover - only on 3.10
+        import tomli as tomllib
+
+    import discussion_helper
+
+    root = Path(__file__).resolve().parent.parent
+    manifest = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    assert manifest["project"]["version"] == discussion_helper.__version__

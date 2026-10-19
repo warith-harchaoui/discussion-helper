@@ -69,6 +69,11 @@ class VocalListener:
         Hint for the recogniser. Empty lets it detect.
     device_name, device_index : str or int, optional
         Which microphone. Resolved by ``capture-helper``.
+    onset_rms : float
+        Level above which a frame counts as somebody starting to talk, used
+        only to answer :meth:`speech_started`. The default suits a headset at
+        a normal distance; raise it in a noisy room, where the cost of getting
+        it wrong is an agent that interrupts itself.
 
     Notes
     -----
@@ -83,16 +88,19 @@ class VocalListener:
         language: str = "",
         device_name: str | None = None,
         device_index: int | None = None,
+        onset_rms: float = 0.02,
     ) -> None:
         self.language = language
         self.device_name = device_name
         self.device_index = device_index
+        self.onset_rms = onset_rms
         self._speech = asyncio.Event()
         self._pipeline: object | None = None
 
     async def utterances(self) -> AsyncIterator[Utterance]:
         """Yield each completed user turn, as the pipeline closes it."""
         try:
+            import numpy as np
             import vocal_helper as voh
         except ImportError as exc:  # pragma: no cover - dependency guard
             raise RuntimeError(
@@ -100,28 +108,79 @@ class VocalListener:
                 "    pip install 'discussion-helper[listen]'"
             ) from exc
 
-        started = time.perf_counter()
-        async for event in voh.sources.from_microphone(
-            device_name=self.device_name, device_index=self.device_index
-        ):
-            # The VAD half, published as it happens: a barge-in cannot wait
-            # for the transcript that this same stream will produce later.
-            if getattr(event, "is_speech", False):
-                self._speech.set()
-            text = getattr(event, "text", "") or ""
+        # `from_microphone` is a *source*: an async iterator of raw PCM frames.
+        # It is not the pipeline, and it carries no transcript — the VAD, the
+        # recogniser and the turn boundaries all live in `voh.Pipeline`, which
+        # this method used not to build. Reading `.text` off a frame that never
+        # had one is the kind of mistake that cannot raise: `PcmFrame` is a
+        # TypedDict, so it is a plain dict at runtime, and `getattr(frame,
+        # "text", "")` quietly answers `""` forever. The loop then skipped
+        # every frame and this listener yielded nothing at all, with no
+        # exception and no log line. Hence subscript access below, never
+        # getattr: a renamed key has to fail loudly.
+        def _tapped_microphone() -> AsyncIterator[object]:
+            """The mic, passed through to the pipeline, with an onset tap."""
+
+            async def frames() -> AsyncIterator[object]:
+                async for frame in voh.sources.from_microphone(
+                    device_name=self.device_name, device_index=self.device_index
+                ):
+                    # Barge-in cannot be answered from the pipeline's output.
+                    # Its earliest event is a VoicedSegment, which Silero emits
+                    # when speech *ends* — after `min_silence_ms` (300 ms by
+                    # default) of trailing silence, and before the recogniser
+                    # has even run. The published bar here is 150 ms from the
+                    # first syllable to silence, so the onset has to be read off
+                    # the raw frames as they go past: one 20 ms frame of
+                    # latency. Level, not Silero, because vocal-helper exposes
+                    # no public single-frame probe (`_score_window` is private)
+                    # and running a second VAD would double the cost of the
+                    # first. A crude detector is also already accounted for:
+                    # `Policy.barge_in_grace_s` exists precisely because,
+                    # without echo cancellation, the loudest thing any such
+                    # detector hears is the agent's own first syllable.
+                    pcm = frame["pcm"]
+                    if float(np.sqrt(np.mean(np.square(pcm)))) >= self.onset_rms:
+                        self._speech.set()
+                    yield frame
+
+            return frames()
+
+        pipeline = voh.Pipeline(
+            source=_tapped_microphone,
+            config=voh.PipelineConfig(
+                # "" means "let the recogniser decide", which whisper spells
+                # "auto".
+                asr={"language": self.language or "auto"},
+                # Both default to None, i.e. off, and both stay off. The LLM
+                # analyst keeps a rolling summary this package has no use for —
+                # it brings its own responder — and semantic end-of-turn buys
+                # ~39 % fewer mid-sentence breaks at the price of an LLM hop per
+                # voiced segment, which is the one currency a voice loop cannot
+                # spend.
+                llm=None,
+                eot=None,
+            ),
+        )
+        self._pipeline = pipeline
+
+        async for event in pipeline.run():
+            # The stream mixes Utterance with SummarySnapshot; only the former
+            # carries text. With `llm=None` no snapshot is produced, but the
+            # check costs nothing and keeps this honest if that ever changes.
+            text = event.get("text", "") if isinstance(event, dict) else ""
             if not text:
                 continue
             self._speech.clear()
-            now = time.perf_counter() - started
             yield Utterance(
                 speaker="user",
                 text=text,
-                started_s=getattr(event, "t0", now),
-                ended_s=getattr(event, "t1", now),
+                started_s=event["t0"],
+                ended_s=event["t1"],
             )
 
     async def speech_started(self) -> None:
-        """Return as soon as the VAD says somebody is talking."""
+        """Return as soon as the level tap says somebody is talking."""
         self._speech.clear()
         await self._speech.wait()
 
