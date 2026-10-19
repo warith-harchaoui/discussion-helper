@@ -95,8 +95,7 @@ dev = [
     "numpy>=1.24",
     # Reads pyproject.toml in the console-script guard. Only needed below
     # 3.11, where tomllib is not yet in the standard library.
-    'tomli>=2.0; python_version < "3.11"',
-]
+    'tomli>=2.0; python_version < "3.11"', "httpx2>=2.0.0"]
 
 [project.scripts]
 discussion-helper = "discussion_helper.cli_click:main"
