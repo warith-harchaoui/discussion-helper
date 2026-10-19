@@ -43,7 +43,7 @@ from typing import Any
 
 from discussion_helper.discussion import Discussion, Policy
 from discussion_helper.parts import Listener, Responder, Voice
-from discussion_helper.types import Conversation, Floor, Utterance
+from discussion_helper.types import Conversation, Floor, Speaker, Utterance
 
 
 @dataclass
@@ -349,6 +349,11 @@ class Sessions:
             await self.remove(session_id)
 
 
-def utterance_of(speaker: str, text: str, at_s: float = 0.0) -> Utterance:
-    """Build an utterance from the wire, for callers that push text in."""
+def utterance_of(speaker: Speaker, text: str, at_s: float = 0.0) -> Utterance:
+    """Build an utterance from the wire, for callers that push text in.
+
+    ``speaker`` is the two-value Literal, not ``str``: this helper exists to
+    accept values off the wire, and a wire value of ``"bot"`` would otherwise
+    build an Utterance that claims to be one of two things and is neither.
+    """
     return Utterance(speaker=speaker, text=text, started_s=at_s, ended_s=at_s)

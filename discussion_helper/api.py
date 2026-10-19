@@ -520,7 +520,7 @@ def _mount_mcp(app: FastAPI) -> None:
     except Exception as exc:  # pragma: no cover - version-pairing guard
         import os_helper as osh
 
-        osh.warn(
+        osh.warning(
             f"MCP surface not mounted ({type(exc).__name__}: {exc}). The HTTP "
             f"API is unaffected; `pip install 'discussion-helper[mcp]'` "
             f"installs a pairing known to work."

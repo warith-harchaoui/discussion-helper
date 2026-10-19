@@ -14,7 +14,6 @@ Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 from __future__ import annotations
 
 import argparse
-import sys
 
 import click
 
@@ -153,4 +152,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
+    # `cli()` raises SystemExit with its own code; wrapping `main()` in
+    # sys.exit would only ever pass None, which means 0 whatever happened.
+    main()

@@ -73,6 +73,7 @@ class ScriptedListener:
             # implementation cannot tell you", and what degrades a
             # conversation to half-duplex rather than breaking it.
             await asyncio.Event().wait()
+            return  # unreachable: nothing ever sets that Event
         await asyncio.sleep(self.interrupt_after_s)
 
     async def aclose(self) -> None:

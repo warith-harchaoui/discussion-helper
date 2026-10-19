@@ -212,7 +212,10 @@ class RemoteVoice:
                     }
                 )
             )
-        audio = await self._speaker.say(  # type: ignore[attr-defined]
+        # `object | None`, because speaker-helper is an optional install and
+        # this module must import without it. The suppression used to name
+        # `attr-defined`, which is not the error mypy raises on a union.
+        audio = await self._speaker.say(  # type: ignore[union-attr]
             sentence, language=self.language or None
         )
         return audio.wav_bytes, audio.duration_s
