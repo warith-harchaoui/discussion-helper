@@ -121,8 +121,12 @@ discussion-helper-mcp            # or: uvicorn discussion_helper.api:build --fac
 
 | Route | What it is |
 |---|---|
+| `GET /health` | whether each of the three parts could run here, and what is missing |
 | `POST /sessions` | start one; returns an id immediately |
+| `GET /sessions` | every conversation this process is holding |
+| `GET /sessions/{id}` | the transcript, the floor and the timings, as they stand |
 | `GET /sessions/{id}/events` | follow it — floor, turns, latency, as they happen |
+| `POST /sessions/{id}/say` | push a user turn in as text, for a remote session |
 | `POST /sessions/{id}/interrupt` | stop the agent, through the same path a barge-in uses |
 | `DELETE /sessions/{id}` | end it, and get what was said |
 | `WS /sessions/{id}/audio` | **the microphone at the other end** |

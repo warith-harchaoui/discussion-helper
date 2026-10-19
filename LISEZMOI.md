@@ -80,6 +80,69 @@ discussion-helper talk --no-barge-in        # semi-duplex strict
 discussion-helper talk --json               # transcription + latences
 ```
 
+## En bibliothèque
+
+```python
+import asyncio
+from discussion_helper import Discussion, Policy
+from discussion_helper.adapters import VocalListener, LocalResponder, SpeakerVoice
+
+async def main():
+    async with Discussion(
+        VocalListener(language="fr"),
+        LocalResponder(),
+        SpeakerVoice(voice="ff_siwis"),
+        Policy(barge_in_grace_s=0.35),
+    ) as talk:
+        conversation = await talk.run()
+
+    for turn in conversation.utterances:
+        print(turn.speaker, turn.text)
+    print(conversation.timings[0].as_dict())
+
+asyncio.run(main())
+```
+
+Apportez vos propres pièces en implémentant `Listener`, `Responder` ou
+`Voice` — un moteur de reconnaissance distant, un modèle scripté pour une
+démo, une ligne téléphonique au lieu d'un haut-parleur. Chacune est une seule
+classe, et la boucle ne change pas.
+
+## Sur HTTP, et sur une socket
+
+Une conversation ne tient pas dans une requête — elle n'a pas de réponse
+unique et dure des minutes — alors la surface HTTP est une session qu'on crée,
+un flux qu'on suit et un bouton qu'on presse :
+
+```bash
+pip install 'discussion-helper[server]'
+discussion-helper-mcp            # ou : uvicorn discussion_helper.api:build --factory
+```
+
+| Route | Ce que c'est |
+|---|---|
+| `GET /health` | si chacune des trois parties pourrait tourner ici, et ce qui manque |
+| `POST /sessions` | en démarrer une ; rend un identifiant immédiatement |
+| `GET /sessions` | toutes les conversations que ce processus tient |
+| `GET /sessions/{id}` | la transcription, la parole et les temps, en l'état |
+| `GET /sessions/{id}/events` | la suivre — parole, tours, latence, au fil de l'eau |
+| `POST /sessions/{id}/say` | pousser un tour utilisateur en texte, pour une session distante |
+| `POST /sessions/{id}/interrupt` | arrêter l'agent, par le même chemin qu'une coupure de parole |
+| `DELETE /sessions/{id}` | la terminer, et récupérer ce qui a été dit |
+| `WS /sessions/{id}/audio` | **le micro à l'autre bout** |
+| `POST /turn` | un échange, sans audio — la forme qu'un agent peut utiliser |
+| `/mcp` | les mêmes routes en outils d'agent |
+
+La WebSocket porte de l'audio réel dans les deux sens : le client envoie du
+PCM et des trames de contrôle, le serveur renvoie des événements et du WAV.
+C'est ainsi que fonctionne tout agent vocal hébergé, et cela veut dire que le
+navigateur peut tenir le micro pendant que ce bout tient le modèle. Deux
+devoirs incombent au client et ne sont pas facultatifs — envoyer
+`{"type":"speaking"}` à la **première syllabe** pour qu'une coupure puisse
+voyager, et **jeter** l'audio tamponné sur `{"kind":"stop"}`. Un client qui
+joue son tampon jusqu'au bout reproduit, à l'autre bout, exactement la surdité
+que l'arrêter ici devait empêcher.
+
 ## Dans un conteneur
 
 ```bash
