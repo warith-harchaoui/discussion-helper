@@ -2,7 +2,7 @@
 
 [🇫🇷](https://github.com/warith-harchaoui/discussion-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/discussion-helper/blob/main/README.md)
 
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/discussion-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#)
 
 `Discussion Helper` fait partie d'une collection de bibliothèques appelée
 `AI Helpers`, développée pour construire de l'intelligence artificielle.
@@ -169,7 +169,7 @@ par processus et un second en paierait sa propre copie, et les sessions ont un
 
 ## À lire avant de régler quoi que ce soit
 
-**[KNOWLEDGE.md](KNOWLEDGE.md)** est le carnet de conception : le budget de
+**[KNOWLEDGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md)** est le carnet de conception : le budget de
 800 ms et où il part vraiment, pourquoi un seuil de silence n'est pas une
 détection de fin de tour, les deux fautes que tout le monde commet une fois
 avec l'interruption, pourquoi on découpe les réponses à la phrase et non au
@@ -187,4 +187,4 @@ warithmetics@deraison.ai
 
 ## Licence
 
-BSD-3-Clause. Voir [LICENSE](LICENSE).
+BSD-3-Clause. Voir [LICENSE](https://github.com/warith-harchaoui/discussion-helper/blob/main/LICENSE).

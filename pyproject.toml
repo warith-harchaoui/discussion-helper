@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [{ name = "Warith HARCHAOUI", email = "warithmetics@deraison.ai" }]
 keywords = [
     "voice-agent", "conversation", "speech", "barge-in", "turn-taking",
@@ -17,7 +18,6 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Topic :: Multimedia :: Sound/Audio :: Speech",
@@ -31,6 +31,18 @@ classifiers = [
 # their own recogniser without uninstalling ours.
 dependencies = [
     "os-helper>=1.7.2",
+    # `discussion-helper` — the headline command, the one the README tells you
+    # to run — is the click front door. Until 0.1.0 click was declared nowhere:
+    # not a dependency, not an extra, so `pip install discussion-helper` put a
+    # command on the PATH that answered a traceback about a package the reader
+    # had never heard of. Only a clean virtualenv shows that; in a checkout
+    # click is always already there.
+    #
+    # At base rather than behind an extra, unlike the sprezzature bricks whose
+    # argparse door is the headline one and whose audit runs on the standard
+    # library alone. Here the click door *is* the product, and
+    # best-engine-ai-helper makes the same call for the same reason.
+    "click>=8.1",
 ]
 
 [project.optional-dependencies]

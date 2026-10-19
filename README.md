@@ -2,7 +2,7 @@
 
 [🇫🇷](https://github.com/warith-harchaoui/discussion-helper/blob/main/LISEZMOI.md) · [🇬🇧](https://github.com/warith-harchaoui/discussion-helper/blob/main/README.md)
 
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#the-promise)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/warith-harchaoui/discussion-helper/blob/main/LICENSE) [![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](#) [![Local-first](https://img.shields.io/badge/privacy-local--first-2f6f5e.svg)](#the-promise)
 
 `Discussion Helper` belongs to a collection of libraries called `AI Helpers`
 developed for building Artificial Intelligence.
@@ -166,7 +166,7 @@ second worker pays for its own copy, and sessions are stateful besides.
 
 ## Read this before tuning anything
 
-**[KNOWLEDGE.md](KNOWLEDGE.md)** is the design notebook: the 800 ms latency
+**[KNOWLEDGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md)** is the design notebook: the 800 ms latency
 budget and where it actually goes, why a silence threshold is not turn
 detection, the two mistakes everyone makes with barge-in, why replies are
 chunked at sentences and not tokens, and why acoustic echo is the problem that
@@ -200,4 +200,4 @@ warithmetics@deraison.ai
 
 ## License
 
-BSD-3-Clause. See [LICENSE](LICENSE).
+BSD-3-Clause. See [LICENSE](https://github.com/warith-harchaoui/discussion-helper/blob/main/LICENSE).
