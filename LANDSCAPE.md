@@ -19,11 +19,33 @@ where the leader wins every column is a scoreboard, not a landscape.
 ## At a glance
 
 <!-- TABLE:START -->
+| Spoken Conversation | Runs locally | Barge-in discards queued audio | Per-stage latency breakdown | Library-shaped | Testable with no hardware | Swappable parts | Telephony and scale |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **discussion-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
+| LiveKit Agents | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Pipecat | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| OpenAI Realtime API | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ |
+| Vocode | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Vapi | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Amazon Lex | ⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐⭐ |
+| Rasa | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| speech_recognition + pyttsx3 | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐ |
 <!-- TABLE:END -->
 
 ## Positioning map
 
 <!-- FIGURE:START -->
+2D representation of the table above.
+
+![Positioning map](https://raw.githubusercontent.com/warith-harchaoui/discussion-helper/main/assets/landscape.png)
+
+The map is a 2-D summary of the seven criteria, so read it as a shape, not a scoreboard. `discussion-helper` is at the top-right corner. The axes read **Horizontal: Adaptable ↔ Modular** and **Vertical: Resourceful ↔ Insightful**.
+
+The map reveals a fundamental tension between approaches that prioritize flexibility and those that emphasize a more structured design. Options clustered on the left side of the map tend to offer greater adaptability, excelling in areas like local operation and integration with existing telephony systems. Conversely, those on the right demonstrate a focus on modularity, allowing for easier component swapping and expansion, particularly when considering features like speech recognition and scalable telephony.
+
+The vertical dimension highlights a difference in how these systems handle information. Those positioned higher on the map demonstrate a capacity for deeper understanding and analysis, providing insights into performance and user interaction. Lower on the map, options prioritize efficient resource utilization and straightforward implementation, often at the expense of more complex analytical capabilities. Notably, discussion-helper leads on the insight axis, but not the adaptability one, suggesting a strength in understanding but less inherent flexibility.
+
+Several options find themselves in interesting positions. For example, both Vapi and Amazon Lex occupy the lower-left corner, indicating a shared emphasis on adaptability and resourcefulness, while OpenAI Realtime API joins them for similar reasons. Conversely, Vocode, Rasa, and speech_recognition + pyttsx3 are grouped in the lower-right, sharing a focus on modularity and a more pragmatic approach to implementation. Discussion-helper and Pipecat both sit in the upper-right, demonstrating a combination of modular design and insightful capabilities, though for different reasons.
 <!-- FIGURE:END -->
 
 ## Positioning

@@ -20,11 +20,33 @@ les colonnes est un tableau d'honneur, pas un paysage.
 ## En un coup d'œil
 
 <!-- TABLE:START -->
+| Conversation Parlée | Fonctionne en local | Interruption qui jette l'audio en attente | Décomposition de latence par étape | Forme bibliothèque | Testable sans matériel | Parties interchangeables | Téléphonie et montée en charge |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **discussion-helper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
+| LiveKit Agents | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Pipecat | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| OpenAI Realtime API | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐ |
+| Vocode | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Vapi | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Amazon Lex | ⭐ | ⭐⭐ | ⭐ | ⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐⭐ |
+| Rasa | ⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| speech_recognition + pyttsx3 | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐ |
 <!-- TABLE:END -->
 
 ## Carte de positionnement
 
 <!-- FIGURE:START -->
+Représentation 2D du tableau ci-dessus.
+
+![Carte de positionnement](https://raw.githubusercontent.com/warith-harchaoui/discussion-helper/main/assets/paysage.png)
+
+La carte est un résumé en 2D des 7 critères : à lire comme une forme, pas comme un classement. « discussion-helper » se situe dans le coin en haut à droite. Les axes se lisent **Horizontal : Fiabilité ↔ Structure** et **Vertical : Adaptabilité ↔ Efficacité**.
+
+L'organisation de ces solutions selon l'axe horizontal révèle une tension entre leur capacité à fonctionner de manière autonome et leur robustesse architecturale. Les options positionnées à gauche, comme Vapi ou Amazon Lex, privilégient une certaine indépendance et une gestion des imprévus, au prix d'une structure potentiellement moins rigide. À l'inverse, celles à droite, menées par discussion-helper et speech_recognition + pyttsx3, se distinguent par une architecture plus définie et une meilleure organisation interne, même si cela peut les rendre moins flexibles face à des situations imprévisibles.
+
+L'axe vertical met en lumière un compromis entre la capacité à s'adapter à des environnements variés et la performance globale. Les solutions situées en haut, discussion-helper et LiveKit Agents, excellent dans leur domaine, optimisant l'utilisation des ressources et minimisant les délais. En revanche, celles qui se trouvent en bas, comme OpenAI Realtime API ou Rasa, semblent accorder plus d'importance à la flexibilité et à la capacité d'intégration, même si cela se fait au détriment de l'efficacité brute.
+
+On observe un regroupement intéressant dans le coin supérieur droit, où discussion-helper et Pipecat se positionnent. Ils partagent une forte efficacité et une structure bien définie, ce qui les rend particulièrement adaptés aux applications nécessitant à la fois performance et organisation. À l'opposé, le coin inférieur gauche rassemble un ensemble d'options – OpenAI Realtime API, Vapi, Amazon Lex – qui misent sur la fiabilité et l'adaptabilité, même si cela implique un certain compromis sur la performance. Enfin, le coin inférieur droit voit se regrouper Vocode, Rasa et speech_recognition + pyttsx3, qui, bien que structurés, privilégient une certaine adaptabilité.
 <!-- FIGURE:END -->
 
 ## Positionnement
