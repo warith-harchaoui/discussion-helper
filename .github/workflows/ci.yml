@@ -1,0 +1,103 @@
+# Continuous integration for discussion-helper.
+#
+# Deliberately light. The exhaustive sweep — every supported Python, both OSes,
+# the model-backed paths — runs locally through .githooks/pre-push before
+# anything reaches here, so this is a gate rather than a test lab.
+#
+# Four jobs:
+#   - lint:       ruff check + ruff format --check.
+#   - test:       mypy, then the full pytest suite, with the surfaces that need
+#                 no hardware
+#                 (server, mcp) installed. The microphone, the model and the
+#                 sound card are all absent on a runner, which is exactly the
+#                 condition this package's tests were written for: the floor
+#                 and interruption logic run against fakes, and the microphone
+#                 path runs against a vocal_helper stand-in.
+#   - triggers:   the agent-skill surface. The suite's rule is that a skill's
+#                 triggers are enforced, not merely written down, and a host
+#                 model only ever reads SKILL.md's `description` before
+#                 deciding to load it. Stdlib only, so it installs nothing.
+#   - attribution: no Claude/Anthropic co-author trailer may enter the history.
+#                 The four "Claude Skill" / "Claude Code" mentions in this repo
+#                 are about the product and do not match the pattern.
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        # Pinned, and pinned low on purpose: 0.16 made Markdown code-fence
+        # formatting the default, which has turned the gate red elsewhere in
+        # the suite on docs nobody touched. Measured here on 2026-10-19 —
+        # 0.15.21 checks the 19 Python files, 0.16.10 the same 19 plus 5
+        # Markdown ones, and both call this repo clean. So the pin costs
+        # nothing today and keeps a future ruff from reformatting prose.
+        # The rule set is named in pyproject (`select = [E, F, I, UP, B, W]`),
+        # which is what actually stops a release from inventing findings.
+        run: python -m pip install "ruff==0.15.21"
+      - name: Lint
+        run: ruff check .
+      - name: Format check
+        run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package + dev and hardware-free extras
+        run: python -m pip install -e ".[dev,server,mcp]"
+      - name: Type check
+        # .githooks/pre-push promises that "the hook passed" and "CI will pass"
+        # mean the same thing, and the hook runs mypy. Leaving it out here
+        # would quietly make that sentence false.
+        run: mypy discussion_helper
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Both front doors respond
+        run: |
+          discussion-helper --version
+          discussion-helper-argparse --version
+      - name: The loop runs with nothing installed behind it
+        # The first command anybody should reach for, and the one that answers
+        # "is it the loop or is it the room". If this fails, the room is
+        # irrelevant.
+        run: discussion-helper rehearse 'bonjour' 'ça va ?' --json
+
+  triggers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Trigger coverage (stdlib only, nothing installed)
+        run: python scripts/check_triggers.py --list
+
+  attribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No Claude/Anthropic co-author trailer in the history
+        run: |
+          attrib='co-authored-by:.*(claude|anthropic)|generated with .{0,4}claude|authored (by|with) .{0,4}claude'
+          if git log --format='%B' | grep -qiE "$attrib"; then
+            echo "A Claude/Anthropic attribution trailer is present in the history."
+            git log --format='%H %B' | grep -iE "$attrib" || true
+            exit 1
+          fi
+          echo "No attribution trailer found."

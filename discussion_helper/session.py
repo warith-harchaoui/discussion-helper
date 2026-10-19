@@ -195,7 +195,7 @@ class Session:
                 Event(
                     kind="timing",
                     at_s=self._elapsed(),
-                    data={**timing.as_dict(), "slowest_stage": timing.slowest_stage},
+                    data=timing.as_dict(),
                 )
             )
 

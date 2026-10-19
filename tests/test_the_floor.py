@@ -506,3 +506,27 @@ def test_the_two_declared_versions_agree() -> None:
     root = Path(__file__).resolve().parent.parent
     manifest = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     assert manifest["project"]["version"] == discussion_helper.__version__
+
+
+def test_every_door_reports_the_same_latency_breakdown() -> None:
+    """The stage to fix must not depend on which door you came through.
+
+    `slowest_stage` is the one field in the breakdown that says what to *do*
+    about a slow conversation, and it used to be bolted on per caller: named
+    by the text CLI, merged in by hand by the HTTP event stream, and missing
+    from the CLI's own `--json` — the door a script reads.
+    """
+    from discussion_helper.types import TurnTiming
+
+    # to_first_audio_s is derived, not stored — the four stages are the input.
+    timing = TurnTiming(endpoint_s=0.1, recognise_s=0.2, think_s=0.9, speak_s=0.1)
+    payload = timing.as_dict()
+    assert payload["slowest_stage"] == timing.slowest_stage == "think"
+    assert set(payload) == {
+        "endpoint_s",
+        "recognise_s",
+        "think_s",
+        "speak_s",
+        "to_first_audio_s",
+        "slowest_stage",
+    }

@@ -89,3 +89,7 @@ synthesised and not yet heard, never drain it.
 
 - `KNOWLEDGE.md` — the latency budget, turn detection, barge-in, echo. Sourced.
 - `references/triggers.md` — when this is the answer, and when it is not.
+- `references/cli-reference.md` — both front doors, and the two options
+  (`--grace`, `--no-barge-in`) that decide how a conversation feels.
+- `references/surfaces.md` — the library, the HTTP routes, and what an
+  agent can and cannot do with a conversation it has no ears for.

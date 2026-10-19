@@ -172,14 +172,23 @@ class TurnTiming:
         }
         return max(stages, key=lambda name: stages[name])
 
-    def as_dict(self) -> dict[str, float]:
-        """The breakdown plus its total, for a log line or a report."""
+    def as_dict(self) -> dict[str, float | str]:
+        """The breakdown plus its total, for a log line or a report.
+
+        ``slowest_stage`` belongs in here rather than being bolted on by each
+        caller. It was not, and the three doors disagreed: the text CLI named
+        the stage to fix, the HTTP event stream merged the key in by hand, and
+        the CLI's own ``--json`` — the one a script reads — omitted it. One
+        serialisation, so a reader gets the same breakdown whichever door they
+        came through.
+        """
         return {
             "endpoint_s": round(self.endpoint_s, 3),
             "recognise_s": round(self.recognise_s, 3),
             "think_s": round(self.think_s, 3),
             "speak_s": round(self.speak_s, 3),
             "to_first_audio_s": round(self.to_first_audio_s, 3),
+            "slowest_stage": self.slowest_stage,
         }
 
 
