@@ -1,0 +1,67 @@
+# `docker compose up` is the whole onboarding. The Dockerfile beside this file
+# is a recipe; this is the way in — the port, the environment and the command,
+# declared rather than reconstructed by the next reader from a `docker run`
+# line in somebody's shell history.
+#
+#   docker compose up -d
+#   curl -s localhost:8090/health
+#
+# Then open a session and stream audio into it over the WebSocket; the agent's
+# audio comes back on the same socket. `references/` in the skill folder has
+# the frame format.
+#
+# One service, and one thing it deliberately does not do: open a microphone.
+# `--transport local` reads this machine's sound card, and a container has
+# none. Passing one in is `--device /dev/snd` on Linux and impossible on macOS
+# — a per-machine arrangement, not an image. The container serves the remote
+# transport, where the caller owns the microphone and sends frames.
+
+services:
+  api:
+    build: .
+    image: discussion-helper:local
+    container_name: discussion-helper
+    ports:
+      # Bound to the loopback on purpose, and `mcp.py` says the same thing in
+      # its own --help: "the host defaults to 127.0.0.1, and should stay
+      # there: this server can open the machine's microphone." Publishing the
+      # container's port on 0.0.0.0 would undo that.
+      #
+      # It is not free to serve either: every open session holds a voice model
+      # in memory and a language model's attention, so an open port is
+      # somebody else's GPU budget — and somebody else's microphone stream
+      # arriving at your machine.
+      - "127.0.0.1:8090:8090"
+    environment:
+      # 0.0.0.0 inside the container, reached only through the loopback
+      # mapping above. The command passes --host too; this is here so a
+      # reader can see where the default comes from.
+      DISCUSSION_HELPER_MCP_HOST: 0.0.0.0
+      DISCUSSION_HELPER_MCP_PORT: "8090"
+      # The voice. Empty means "read the text, detect the language, pick the
+      # voice that speaks it"; set it to pin one, e.g. ff_siwis.
+      SPEAKER_HELPER_VOICE: ""
+      SPEAKER_HELPER_LANGUAGE: fr
+      # The model that answers. best-engine resolves one that fits the
+      # machine when this is unset; pin it when you want the same answer
+      # tomorrow as today.
+      BEST_LLM_TEXT: ""
+      LOG_LEVEL: info
+    volumes:
+      # Transcripts and recorded audio, written beside the session rather than
+      # kept only inside the container.
+      - ./work:/work
+    working_dir: /work
+    restart: unless-stopped
+    # One worker, deliberately. The voice backend loads its ONNX graph once
+    # per process and keeps it; a second worker does not share that model, it
+    # pays for its own copy. The symptom of getting this wrong is not an error
+    # — it is a container using several times the memory it needs. Sessions
+    # are stateful besides: a second worker would answer half of one
+    # conversation's frames with no idea who is speaking.
+    command:
+      - discussion-helper-mcp
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8090"

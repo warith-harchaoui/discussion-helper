@@ -138,6 +138,26 @@ the model. Two duties fall on the client and are not optional — send
 out reproduces, at the far end, exactly the deafness that stopping it here
 was meant to prevent.
 
+### In a container
+
+```bash
+docker compose up -d
+curl -s localhost:8090/health
+```
+
+The image serves the **remote** transport — the caller owns the microphone and
+sends frames — and that is the honest half of this package a container can
+run. It does **not** open a microphone of its own: `--transport local` reads
+the machine's sound card, and a container has none. Passing one in is
+`--device /dev/snd` on Linux and impossible on macOS, which is a per-machine
+arrangement rather than an image, so the `listen` extra is deliberately left
+out and the refusal happens at install time instead of at the first call.
+
+The port is bound to the loopback, and the reason is in `discussion-helper-mcp
+--help` as well: this server can open a microphone. One worker, also
+deliberately — the voice backend loads its ONNX graph once per process and a
+second worker pays for its own copy, and sessions are stateful besides.
+
 ## Read this before tuning anything
 
 **[KNOWLEDGE.md](KNOWLEDGE.md)** is the design notebook: the 800 ms latency

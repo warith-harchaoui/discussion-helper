@@ -80,6 +80,28 @@ discussion-helper talk --no-barge-in        # semi-duplex strict
 discussion-helper talk --json               # transcription + latences
 ```
 
+## Dans un conteneur
+
+```bash
+docker compose up -d
+curl -s localhost:8090/health
+```
+
+L'image sert le transport **distant** — c'est l'appelant qui tient le micro et
+envoie les trames — et c'est la moitié de ce paquet qu'un conteneur peut
+honnêtement faire tourner. Elle n'ouvre **pas** de micro : `--transport local`
+lit la carte son de la machine, et un conteneur n'en a pas. En passer une, ce
+sont des `--device /dev/snd` sous Linux et rien du tout sous macOS — un
+arrangement par machine, pas une image. L'extra `listen` est donc
+volontairement absent, et le refus arrive à l'installation plutôt qu'au
+premier appel.
+
+Le port est lié à la boucle locale, et la raison est aussi dans
+`discussion-helper-mcp --help` : ce serveur peut ouvrir un micro. Un seul
+worker, également délibéré — le moteur de voix charge son graphe ONNX une fois
+par processus et un second en paierait sa propre copie, et les sessions ont un
+état.
+
 ## À lire avant de régler quoi que ce soit
 
 **[KNOWLEDGE.md](KNOWLEDGE.md)** est le carnet de conception : le budget de
