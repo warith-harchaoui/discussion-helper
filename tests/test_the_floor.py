@@ -530,3 +530,36 @@ def test_every_door_reports_the_same_latency_breakdown() -> None:
         "to_first_audio_s",
         "slowest_stage",
     }
+
+
+def test_both_front_doors_report_the_same_version() -> None:
+    """Three places can state this package's version; they must not disagree.
+
+    `pyproject.toml`, `__version__`, and the installed distribution's metadata.
+    The click door used to read the third via `version_option(package_name=...)`
+    while the argparse door read the second, so the two answered from different
+    sources and diverged the moment an editable install fell a step behind the
+    code -- the normal state mid-development. Measured before the fix: click
+    said 0.1.0 while argparse said 0.2.0, in the same checkout.
+
+    Only the number is compared. The surrounding wording is each framework's
+    own ("prog, version X" against "prog X") and is not worth forcing.
+    """
+    import re
+    import subprocess
+    import sys
+
+    import discussion_helper
+
+    seen = []
+    for module in ("discussion_helper.cli_click", "discussion_helper.cli"):
+        done = subprocess.run(
+            [sys.executable, "-c", f"import {module} as m; m.main()", "--version"],
+            capture_output=True,
+            text=True,
+        )
+        found = re.search(r"\d+\.\d+\.\d+", done.stdout + done.stderr)
+        assert found, (module, done.stdout, done.stderr)
+        seen.append(found.group(0))
+
+    assert seen[0] == seen[1] == discussion_helper.__version__, seen

@@ -17,6 +17,7 @@ import argparse
 
 import click
 
+from discussion_helper import __version__
 from discussion_helper import cli as _argcli
 
 #: Every command, and the handler it shares with the argparse front door. A
@@ -65,7 +66,14 @@ def _common(function):  # type: ignore[no-untyped-def]
         "turn detection, and why echo decides your defaults."
     ),
 )
-@click.version_option(package_name="discussion-helper")
+# Read from the package, not from the installed distribution's metadata.
+# `package_name=` alone sends click to importlib.metadata, while the argparse
+# door reads `__version__`, so the two front doors answered from two different
+# sources and disagreed whenever the install was a step behind the code -- which
+# is every editable checkout mid-development. Measured here: click said 0.1.0
+# while argparse said 0.2.0. A suite whose premise is that the two doors agree
+# cannot have them disagreeing about what version they are.
+@click.version_option(version=__version__, package_name="discussion-helper")
 def cli() -> None:  # pragma: no cover - click dispatches
     """Front door over the two commands."""
 

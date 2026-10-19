@@ -32,6 +32,15 @@ both inert on the only path that uses a real microphone.
   new `onset_rms` knob tunes it; `Policy.barge_in_grace_s` already existed to
   absorb exactly this kind of detector hearing the agent's own first syllable.
 
+- **The two front doors reported different versions.** `--version` on the click
+  door answered from the installed distribution's metadata (`version_option`
+  with only `package_name=`), while the argparse door read `__version__`. Three
+  places can state this package's version and the two doors read two of them,
+  so they diverged the moment an editable install fell a step behind the code,
+  which is the normal state mid-development: measured in one checkout, click
+  said 0.1.0 and argparse said 0.2.0. Both read `__version__` now, and a test
+  compares the numbers the two commands actually print.
+
 - **Three tests on the microphone path, which had none.** They run with no
   microphone, against a `vocal_helper` stand-in shaped like the real one in
   the way that mattered — events are dicts. Two of them fail against v0.1.0:
