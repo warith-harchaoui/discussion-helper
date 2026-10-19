@@ -170,9 +170,7 @@ class LocalResponder:
         "offer to go further."
     )
 
-    def __init__(
-        self, *, system: str = "", max_sentences: int = 4, stream: bool = True
-    ) -> None:
+    def __init__(self, *, system: str = "", max_sentences: int = 4, stream: bool = True) -> None:
         self.system = system or self.DEFAULT_SYSTEM
         self.max_sentences = max_sentences
         self.stream = stream
@@ -193,9 +191,7 @@ class LocalResponder:
         try:
             from best_engine_ai_helper.llm import chat_stream
 
-            await asyncio.to_thread(
-                lambda: next(iter(chat_stream("ok", system="Say ok.")), "")
-            )
+            await asyncio.to_thread(lambda: next(iter(chat_stream("ok", system="Say ok.")), ""))
         except Exception:  # noqa: BLE001 - a warm-up may not fail a conversation
             return
 
@@ -253,9 +249,7 @@ class LocalResponder:
         # be spoken while the rest is still being written.
         pending = ""
         emitted = 0
-        async for piece in _in_thread(
-            chat_stream(prompt, system=self.system)
-        ):
+        async for piece in _in_thread(chat_stream(prompt, system=self.system)):
             pending += piece
             # Split on every arrival rather than buffering to a size: the
             # first sentence is the only one on the latency path, and a buffer
@@ -341,9 +335,7 @@ class SpeakerVoice:
         try:
             await self._playing
         except asyncio.CancelledError:
-            return SpokenSentence(
-                text=sentence, first_audio_s=first_audio_s, cut=True
-            )
+            return SpokenSentence(text=sentence, first_audio_s=first_audio_s, cut=True)
         finally:
             self._playing = None
         return SpokenSentence(

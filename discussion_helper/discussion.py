@@ -165,9 +165,7 @@ class Discussion:
         lands on the user's first question.
         """
         warmable = [
-            part
-            for part in (self.listener, self.responder, self.voice)
-            if hasattr(part, "warmup")
+            part for part in (self.listener, self.responder, self.voice) if hasattr(part, "warmup")
         ]
         if not warmable:
             return
@@ -275,9 +273,7 @@ class Discussion:
         if barge_in is None:
             return await speaking
 
-        done, _ = await asyncio.wait(
-            {speaking, barge_in}, return_when=asyncio.FIRST_COMPLETED
-        )
+        done, _ = await asyncio.wait({speaking, barge_in}, return_when=asyncio.FIRST_COMPLETED)
         if speaking in done:
             return speaking.result()
 

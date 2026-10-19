@@ -10,8 +10,16 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-echo "[pre-push] ruff..."
-ruff check . || { echo "[pre-push] ruff failed - push aborted."; exit 1; }
+echo "[pre-push] ruff check..."
+ruff check . || { echo "[pre-push] ruff check failed - push aborted."; exit 1; }
+
+# Formatting as well as linting, which best-engine-ai-helper's hook already
+# does and this one did not. The two catch different things: `check` finds an
+# unused import, `format` finds a line somebody wrapped by hand. Twelve files
+# in this repository were unformatted and nothing said so, because only half
+# the gate was here.
+echo "[pre-push] ruff format..."
+ruff format --check . || { echo "[pre-push] ruff format failed - push aborted (run: ruff format .)"; exit 1; }
 
 echo "[pre-push] mypy..."
 mypy discussion_helper || { echo "[pre-push] mypy failed - push aborted."; exit 1; }

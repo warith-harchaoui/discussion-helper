@@ -210,9 +210,7 @@ async def test_the_budget_counts_time_to_first_audio_not_playback() -> None:
     silence before the sound, and only the voice knows it.
     """
     voice = SilentVoice(seconds_per_sentence=0.40, first_audio_s=0.02)
-    conversation = await Discussion(
-        ScriptedListener(["bonjour"]), EchoResponder(), voice
-    ).run()
+    conversation = await Discussion(ScriptedListener(["bonjour"]), EchoResponder(), voice).run()
     timing = conversation.timings[0]
     assert timing.speak_s == pytest.approx(0.02, abs=0.01)
     assert timing.speak_s < 0.40, "playback time must not land in the budget"
@@ -241,9 +239,7 @@ def test_sentences_split_at_sentence_ends_not_at_clauses() -> None:
     from discussion_helper.adapters import split_sentences
 
     assert split_sentences("Un. Deux ! Trois ?") == ["Un.", "Deux !", "Trois ?"]
-    assert split_sentences("Une phrase, avec une virgule.") == [
-        "Une phrase, avec une virgule."
-    ]
+    assert split_sentences("Une phrase, avec une virgule.") == ["Une phrase, avec une virgule."]
 
 
 def test_importing_an_adapter_does_not_import_its_sibling() -> None:

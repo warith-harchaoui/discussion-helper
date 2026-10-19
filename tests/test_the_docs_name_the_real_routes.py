@@ -44,17 +44,11 @@ _NOT_FOR_READERS = {
 
 def _declared_routes() -> set[str]:
     """Every path the FastAPI app serves, as the app itself reports them."""
-    fastapi = pytest.importorskip(
-        "fastapi", reason="the HTTP surface is behind the [server] extra"
-    )
+    fastapi = pytest.importorskip("fastapi", reason="the HTTP surface is behind the [server] extra")
     assert fastapi  # the import is the point
     from discussion_helper.api import build
 
-    paths = {
-        getattr(route, "path", "")
-        for route in build().routes
-        if getattr(route, "path", "")
-    }
+    paths = {getattr(route, "path", "") for route in build().routes if getattr(route, "path", "")}
     return {p for p in paths if p not in _NOT_FOR_READERS}
 
 

@@ -56,7 +56,7 @@ def client() -> TestClient:
 
 
 def test_health_answers_for_each_part_separately(client: TestClient) -> None:
-    """"It does not work" is useless when two thirds of it does."""
+    """ "It does not work" is useless when two thirds of it does."""
     body = client.get("/health").json()
     assert body["status"] == "ok"
     assert set(body["parts"]) == {"listen", "think", "speak", "play"}
@@ -128,9 +128,9 @@ def test_an_unknown_session_is_a_404_naming_what_was_asked_for(client: TestClien
 
 def test_the_event_stream_reports_the_floor_and_the_turns(client: TestClient) -> None:
     """A watcher wants what a transcript would show, not every audio frame."""
-    session_id = client.post(
-        "/sessions", json={"transport": "fake", "turns": ["bonjour"]}
-    ).json()["id"]
+    session_id = client.post("/sessions", json={"transport": "fake", "turns": ["bonjour"]}).json()[
+        "id"
+    ]
 
     kinds: list[str] = []
     with client.stream("GET", f"/sessions/{session_id}/events") as stream:
@@ -152,9 +152,9 @@ def test_the_event_stream_reports_the_floor_and_the_turns(client: TestClient) ->
 
 def test_interrupting_when_nobody_is_speaking_is_not_an_error(client: TestClient) -> None:
     """The common case for a button pressed a moment too late."""
-    session_id = client.post(
-        "/sessions", json={"transport": "fake", "turns": ["bonjour"]}
-    ).json()["id"]
+    session_id = client.post("/sessions", json={"transport": "fake", "turns": ["bonjour"]}).json()[
+        "id"
+    ]
     body = client.post(f"/sessions/{session_id}/interrupt").json()
     assert body["interrupted"] in (True, False)
     assert "floor" in body
@@ -212,8 +212,7 @@ def test_a_text_turn_says_what_is_missing_rather_than_failing(client: TestClient
         # improvement look like a regression. What has to hold is that it
         # tells the reader something to *do*.
         assert any(
-            action in detail
-            for action in ("pip install", "ollama pull", "BEST_LLM", "http")
+            action in detail for action in ("pip install", "ollama pull", "BEST_LLM", "http")
         ), detail
     else:
         assert answer.json()["sentences"]
@@ -333,9 +332,7 @@ def test_stopping_tells_the_client_to_drop_what_it_holds() -> None:
             # Wait until it is actually speaking, then cut it off.
             while True:
                 message = socket.receive()
-                if message.get("text") and json.loads(message["text"]).get(
-                    "kind"
-                ) == "speaking":
+                if message.get("text") and json.loads(message["text"]).get("kind") == "speaking":
                     break
             client.post(f"/sessions/{session.id}/interrupt")
 

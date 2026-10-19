@@ -95,9 +95,7 @@ class RemoteListener:
             return
         now = time.perf_counter() - self._started
         self._speech.clear()
-        self._turns.put_nowait(
-            Utterance(speaker="user", text=text, started_s=now, ended_s=now)
-        )
+        self._turns.put_nowait(Utterance(speaker="user", text=text, started_s=now, ended_s=now))
 
     async def push_audio(self, pcm: bytes) -> None:
         """Hand in one completed utterance's worth of PCM.
@@ -233,9 +231,7 @@ class RemoteVoice:
             return SpokenSentence(text=sentence, first_audio_s=first_audio_s, cut=True)
         finally:
             self._sending = None
-        return SpokenSentence(
-            text=sentence, first_audio_s=first_audio_s, played_s=duration_s
-        )
+        return SpokenSentence(text=sentence, first_audio_s=first_audio_s, played_s=duration_s)
 
     async def stop(self) -> None:
         """Stop sending, and tell the client to drop what it holds."""

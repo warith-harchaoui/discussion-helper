@@ -87,6 +87,7 @@ import asyncio
 from discussion_helper import Discussion, Policy
 from discussion_helper.adapters import VocalListener, LocalResponder, SpeakerVoice
 
+
 async def main():
     async with Discussion(
         VocalListener(language="fr"),
@@ -99,6 +100,7 @@ async def main():
     for turn in conversation.utterances:
         print(turn.speaker, turn.text)
     print(conversation.timings[0].as_dict())
+
 
 asyncio.run(main())
 ```

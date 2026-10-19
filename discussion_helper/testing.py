@@ -127,9 +127,7 @@ class SilentVoice:
         How many times it was told to stop.
     """
 
-    def __init__(
-        self, seconds_per_sentence: float = 0.05, first_audio_s: float = 0.0
-    ) -> None:
+    def __init__(self, seconds_per_sentence: float = 0.05, first_audio_s: float = 0.0) -> None:
         self.seconds_per_sentence = seconds_per_sentence
         self.first_audio_s = first_audio_s
         self.spoken: list[str] = []
@@ -139,15 +137,13 @@ class SilentVoice:
         self._stopped = asyncio.Event()
 
     async def speak(self, sentence: str) -> SpokenSentence:
-        """"Play" one sentence, returning early if stopped."""
+        """ "Play" one sentence, returning early if stopped."""
         self.spoken.append(sentence)
         self._stopped.clear()
         if self.first_audio_s:
             await asyncio.sleep(self.first_audio_s)
         try:
-            await asyncio.wait_for(
-                self._stopped.wait(), timeout=self.seconds_per_sentence
-            )
+            await asyncio.wait_for(self._stopped.wait(), timeout=self.seconds_per_sentence)
         except TimeoutError:
             # Nobody stopped us: the sentence finished.
             self.completed.append(sentence)

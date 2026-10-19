@@ -51,9 +51,9 @@ def _common(function):  # type: ignore[no-untyped-def]
     function = click.option(
         "--max-sentences", type=int, default=0, help="Cap on reply length; 0 is none."
     )(function)
-    function = click.option(
-        "--json", "json_", is_flag=True, default=False, help="Emit JSON."
-    )(function)
+    function = click.option("--json", "json_", is_flag=True, default=False, help="Emit JSON.")(
+        function
+    )
     return function
 
 

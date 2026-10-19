@@ -463,9 +463,7 @@ async def _synthesise_base64(text: str, voice: str, language: str) -> str:
             ),
         ) from exc
     async with Speaker(
-        Settings.from_mapping(
-            {"backend": "kokoro", "voice": voice, "language": language or "fr"}
-        )
+        Settings.from_mapping({"backend": "kokoro", "voice": voice, "language": language or "fr"})
     ) as speaker:
         audio = await speaker.say(text, language=language or None)
     return base64.b64encode(audio.wav_bytes).decode("ascii")

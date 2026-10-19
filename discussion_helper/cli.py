@@ -51,9 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
             "echo decides your defaults.\n"
         ),
     )
-    parser.add_argument(
-        "-V", "--version", action="version", version=_version_string()
-    )
+    parser.add_argument("-V", "--version", action="version", version=_version_string())
     sub = parser.add_subparsers(dest="command", required=True)
 
     common = argparse.ArgumentParser(add_help=False)
@@ -84,9 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write the transcript and the latency breakdown as JSON.",
     )
 
-    p_talk = sub.add_parser(
-        "talk", parents=[common], help="Hold a conversation at the microphone."
-    )
+    p_talk = sub.add_parser("talk", parents=[common], help="Hold a conversation at the microphone.")
     p_talk.add_argument("--voice", default="", help="Voice to read with.")
     p_talk.add_argument("--language", default="", help="Language hint.")
     p_talk.add_argument("--device", default=None, help="Microphone name substring.")
@@ -104,9 +100,7 @@ def build_parser() -> argparse.ArgumentParser:
         parents=[common],
         help="Run the same loop with fake parts — no microphone, model or speaker.",
     )
-    p_rehearse.add_argument(
-        "turns", nargs="*", default=["bonjour"], help="What the user says."
-    )
+    p_rehearse.add_argument("turns", nargs="*", default=["bonjour"], help="What the user says.")
     p_rehearse.add_argument(
         "--interrupt-after",
         type=float,
