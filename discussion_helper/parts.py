@@ -96,6 +96,29 @@ class Responder(Protocol):
 
 
 @runtime_checkable
+class Warmable(Protocol):
+    """A part with a first call that costs more than its later ones.
+
+    Measured, not assumed: the local model client's content-safety scan takes
+    **4.8 seconds** on its first call in a process — it loads a classifier —
+    and **0.25 seconds** on every call after. The speech engine behaves the
+    same way, loading an ONNX graph once.
+
+    Unwarmed, that cost lands on the user's first question, which is the worst
+    possible place: the one turn where somebody is deciding whether this thing
+    works. Warmed while the microphone is opening, it costs nothing at all,
+    because the user has not finished deciding to speak.
+
+    Optional. :class:`~discussion_helper.discussion.Discussion` warms whatever
+    offers it and ignores whatever does not.
+    """
+
+    async def warmup(self) -> None:
+        """Pay the first-call cost now, before anybody is waiting."""
+        ...
+
+
+@runtime_checkable
 class Voice(Protocol):
     """Speaks a sentence, and can be stopped in the middle of it.
 

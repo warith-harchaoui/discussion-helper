@@ -136,6 +136,7 @@ class Discussion:
             Everything said, with a :class:`~discussion_helper.types.TurnTiming`
             per exchange.
         """
+        await self.warmup()
         self.conversation.floor = Floor.LISTENING
         try:
             async for utterance in self._user_turns():
@@ -149,6 +150,31 @@ class Discussion:
         finally:
             self.conversation.floor = Floor.IDLE
         return self.conversation
+
+    async def warmup(self) -> None:
+        """Pay every part's first-call cost before the user says anything.
+
+        Concurrently, and never fatally. A part that cannot warm up may still
+        work — and a conversation that refused to start because a *pre*-load
+        failed would be refusing over something that was optional by
+        construction.
+
+        The numbers that make this worth doing are in
+        :class:`~discussion_helper.parts.Warmable`: 4.8 seconds on the first
+        model call in a process, 0.25 on the rest. Unwarmed, the whole of that
+        lands on the user's first question.
+        """
+        warmable = [
+            part
+            for part in (self.listener, self.responder, self.voice)
+            if hasattr(part, "warmup")
+        ]
+        if not warmable:
+            return
+        await asyncio.gather(
+            *(part.warmup() for part in warmable),  # type: ignore[attr-defined]
+            return_exceptions=True,
+        )
 
     async def _user_turns(self) -> AsyncIterator[Utterance]:
         """Yield user turns, giving up after ``silence_timeout_s`` of nothing."""

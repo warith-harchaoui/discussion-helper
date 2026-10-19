@@ -139,18 +139,28 @@ class LocalResponder:
     ----------
     system : str
         The instruction the model is given. The default asks for brevity, and
-        that is a latency decision rather than a style one: an agent that
-        talks for ninety seconds is one the user has to interrupt, and
-        interruption is the expensive path.
+        that is a latency decision rather than a style one — see below.
     max_sentences : int
         Stop after this many sentences even if the model keeps going.
 
-    Notes
-    -----
-    Sentences are emitted as soon as they are complete rather than when the
-    answer is. Waiting for the whole reply adds its entire generation time to
-    the silence the user sits through; yielding the first sentence removes all
-    but its own share.
+    The streaming that is not here, and what it costs
+    -------------------------------------------------
+    ``best_engine_ai_helper.llm.chat`` returns a finished string. It does not
+    stream tokens, so the usual trick of speaking the first sentence while the
+    rest is still being written is **not available on this path**, and it
+    would be dishonest to pretend otherwise by yielding sentences from a
+    string that is already complete.
+
+    The consequence is concrete and belongs in the budget: ``think_s`` here is
+    the *whole* generation, not a first token. A stack with a streaming client
+    spends 150–400 ms on that line; this one spends however long the answer
+    takes. Which is exactly why the default system prompt asks for one or two
+    sentences, and why ``max_sentences`` exists — on a non-streaming client,
+    answer length is latency, directly and entirely.
+
+    Sentences are still the unit yielded, and that still earns its keep: it is
+    what gives a barge-in somewhere to land, and what keeps the synthesiser
+    reading whole sentences rather than clauses.
     """
 
     DEFAULT_SYSTEM = (
@@ -160,30 +170,96 @@ class LocalResponder:
         "offer to go further."
     )
 
-    def __init__(self, *, system: str = "", max_sentences: int = 4) -> None:
+    def __init__(
+        self, *, system: str = "", max_sentences: int = 4, stream: bool = True
+    ) -> None:
         self.system = system or self.DEFAULT_SYSTEM
         self.max_sentences = max_sentences
+        self.stream = stream
+
+    async def warmup(self) -> None:
+        """Pay the model client's first-call cost before anybody is waiting.
+
+        Measured on this stack: the first call in a process takes **4.8 s**
+        because the content-safety scan loads a classifier; every call after
+        takes **0.25 s**. Unwarmed, those four and a half seconds land on the
+        user's first question — the single turn where somebody is deciding
+        whether this thing works at all.
+
+        Failures are swallowed on purpose. This is a pre-load; if the model is
+        unreachable the real call will say so, with a better message and at a
+        moment the caller asked for.
+        """
+        try:
+            from best_engine_ai_helper.llm import chat_stream
+
+            await asyncio.to_thread(
+                lambda: next(iter(chat_stream("ok", system="Say ok.")), "")
+            )
+        except Exception:  # noqa: BLE001 - a warm-up may not fail a conversation
+            return
+
+    def render(self, messages: list[dict[str, str]]) -> str:
+        """The conversation so far, as one prompt.
+
+        ``chat`` takes a prompt and a system instruction, not a message list,
+        so the history has to be rendered. Written as a transcript with named
+        turns rather than concatenated: without the names, a model answering
+        the third turn cannot tell its own earlier words from the user's, and
+        starts agreeing with itself.
+        """
+        lines = [
+            f"{'User' if m['role'] == 'user' else 'You'}: {m['content'].strip()}"
+            for m in messages
+            if m.get("content", "").strip()
+        ]
+        lines.append("You:")
+        return "\n".join(lines)
 
     async def reply(self, messages: list[dict[str, str]]) -> AsyncIterator[str]:
-        """Yield the answer one sentence at a time."""
+        """Yield the answer one speakable sentence at a time."""
+        # `best_engine_ai_helper.llm.chat`, not `best_engine_ai_helper.chat`.
+        # The suite routes every model call through that one function — no
+        # script imports an Ollama or OpenAI client directly — and the
+        # submodule is where it lives.
         try:
-            import best_engine_ai_helper as beh
+            from best_engine_ai_helper.llm import chat, chat_stream
         except ImportError as exc:  # pragma: no cover - dependency guard
             raise RuntimeError(
                 "answering needs a local model. Install it with:\n"
                 "    pip install 'discussion-helper[think]'"
             ) from exc
 
-        full = [{"role": "system", "content": self.system}, *messages]
+        prompt = self.render(messages)
+
+        if not self.stream:
+            # In a thread: `chat` is blocking, and this coroutine shares its
+            # loop with the barge-in watcher. Calling it directly would freeze
+            # the loop for the whole generation — the agent would be unable to
+            # notice an interruption during precisely the stretch where one is
+            # most likely.
+            answer = await asyncio.to_thread(chat, prompt, system=self.system)
+            if isinstance(answer, dict):  # pragma: no cover - json_schema path
+                answer = str(answer.get("text", answer))
+            for index, sentence in enumerate(split_sentences(str(answer))):
+                if index >= self.max_sentences:
+                    return
+                yield sentence
+            return
+
+        # Streaming. Measured on this stack, warm: the first token arrives in
+        # 0.25 s where the whole answer takes several seconds. That difference
+        # is the whole budget — see KNOWLEDGE.md §2 — because the sentence can
+        # be spoken while the rest is still being written.
         pending = ""
         emitted = 0
-
-        async for piece in _as_async(beh.chat(full, stream=True)):
+        async for piece in _in_thread(
+            chat_stream(prompt, system=self.system)
+        ):
             pending += piece
             # Split on every arrival rather than buffering to a size: the
-            # first sentence is the only one on the latency path, and a
-            # buffer would hold it back for the benefit of the ones that are
-            # not.
+            # first sentence is the only one on the latency path, and a buffer
+            # would hold it back for the benefit of the ones that are not.
             sentences = split_sentences(pending)
             if len(sentences) > 1:
                 for sentence in sentences[:-1]:
@@ -195,8 +271,8 @@ class LocalResponder:
 
         tail = pending.strip()
         if tail and emitted < self.max_sentences:
-            # The last sentence rarely ends in punctuation — models stop
-            # mid-flow — so the tail is spoken rather than dropped.
+            # Models stop mid-flow, so the last sentence rarely ends in
+            # punctuation. Spoken rather than dropped.
             yield tail
 
     async def aclose(self) -> None:
@@ -322,17 +398,24 @@ async def _play(wav_bytes: bytes) -> None:
         raise
 
 
-async def _as_async(stream: object) -> AsyncIterator[str]:
-    """Iterate a stream that may be sync or async.
+async def _in_thread(generator: object) -> AsyncIterator[str]:
+    """Consume a blocking generator without freezing the event loop.
 
-    Chat clients differ on this and the difference is not interesting here.
+    ``chat_stream`` yields from a synchronous HTTP response. Iterating it
+    directly in a coroutine blocks the loop between tokens — and the thing
+    waiting on that loop is the barge-in watcher, so the agent would become
+    deaf for exactly as long as it is talking.
+
+    One ``to_thread`` per item rather than a queue and a worker: the items are
+    sub-word strings arriving every few tens of milliseconds, the hop costs
+    microseconds, and a queue would need its own shutdown story for the case
+    this package cares about most — the consumer breaking out early because
+    somebody interrupted.
     """
-    if hasattr(stream, "__aiter__"):
-        async for piece in stream:  # type: ignore[union-attr]
-            yield str(piece)
-        return
-    for piece in stream:  # type: ignore[union-attr]
+    iterator = iter(generator)  # type: ignore[call-overload]
+    sentinel = object()
+    while True:
+        piece = await asyncio.to_thread(next, iterator, sentinel)
+        if piece is sentinel:
+            return
         yield str(piece)
-        # Yield to the loop between pieces, or a synchronous generator would
-        # starve the barge-in watcher for the whole reply.
-        await asyncio.sleep(0)

@@ -108,6 +108,36 @@ Bring your own parts by implementing `Listener`, `Responder` or `Voice` — a
 cloud recogniser, a scripted model for a demo, a phone line instead of a
 speaker. Each is one class, and the loop does not change.
 
+## Over HTTP, and over a socket
+
+A conversation does not fit a request — it has no single answer and lasts
+minutes — so the HTTP surface is a session you create, a stream you follow and
+a button you press:
+
+```bash
+pip install 'discussion-helper[server]'
+discussion-helper-mcp            # or: uvicorn discussion_helper.api:build --factory
+```
+
+| Route | What it is |
+|---|---|
+| `POST /sessions` | start one; returns an id immediately |
+| `GET /sessions/{id}/events` | follow it — floor, turns, latency, as they happen |
+| `POST /sessions/{id}/interrupt` | stop the agent, through the same path a barge-in uses |
+| `DELETE /sessions/{id}` | end it, and get what was said |
+| `WS /sessions/{id}/audio` | **the microphone at the other end** |
+| `POST /turn` | one exchange, no audio — the shape an agent can use |
+| `/mcp` | the same routes as agent tools |
+
+The WebSocket carries real audio both ways: the client sends PCM and control
+frames, the server sends events and WAV. That is how every hosted voice agent
+works, and it means the browser can hold the microphone while this end holds
+the model. Two duties fall on the client and are not optional — send
+`{"type":"speaking"}` on the **first syllable** so a barge-in can travel, and
+**drop** buffered audio on `{"kind":"stop"}`. A client that plays its buffer
+out reproduces, at the far end, exactly the deafness that stopping it here
+was meant to prevent.
+
 ## Read this before tuning anything
 
 **[KNOWLEDGE.md](KNOWLEDGE.md)** is the design notebook: the 800 ms latency

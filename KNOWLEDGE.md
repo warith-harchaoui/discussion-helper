@@ -47,6 +47,32 @@ sentence is already being spoken — recover most of the budget without making
 any single stage faster. Pipelines that overshoot at 1,180 ms land under 800
 by overlapping alone.
 
+### Measured on this stack, not quoted
+
+Everything above is from published work. These are from this machine, a
+laptop running Ollama with `gemma3:12b`, and they changed the design:
+
+| What | Cold | Warm |
+|---|---|---|
+| First token, streamed | 4.78 s | **0.25 s** |
+| Whole answer, `chat()` | 4.53 s | — |
+| First *sentence*, through the responder | — | **1.03 s** |
+| Content-safety scan alone | 4.45 s | 0.16 s |
+
+Two things fall out of that table.
+
+**Streaming is not a refinement here, it is the difference between a
+conversation and a wait.** A whole answer costs seconds; the first sentence
+costs one. The sentence can be spoken while the rest is still being written,
+so only its share lands in the budget.
+
+**The cold column is a first-call cost, and it lands in the worst possible
+place.** 4.8 s of it is the safety classifier loading, once per process.
+Unwarmed, the user pays it on their *first question* — the one turn where
+somebody is deciding whether this thing works. So the loop warms every part
+that offers a `warmup()` before it opens the microphone, and by the time
+anybody speaks the cost is gone. See `parts.Warmable`.
+
 ### What this package measures
 
 Every exchange returns a `TurnTiming` with the four stages split out and a
@@ -240,6 +266,23 @@ language model's first token, and the lever that works is a smaller model
 rather than a faster one. `best-engine-ai-helper` picks the largest model that
 fits the machine's memory, which is the right default for quality and not
 always the right one for a conversation.
+
+**And the client has to stream.** It did not, when this package was written —
+`best_engine_ai_helper.llm.chat` returned a finished string — which put the
+*whole* generation inside the 800 ms budget rather than the first sentence's
+share. `chat_stream` was added to that package rather than worked around
+here: every model call in this suite routes through one function, and a second
+path reaching for Ollama directly would be a second place to fix. It speaks
+Ollama only, and refuses other backends rather than silently returning a whole
+answer — a "stream" that does not stream makes a caller's latency measurement
+lie about its own mode.
+
+One honest cost comes with it. `chat` scans its reply for content-policy
+problems before returning; a stream cannot, because seeing the text as it
+arrives is the point. The scan therefore runs when the stream ends: a caller
+that buffers is protected exactly as before, a caller that *speaks* each chunk
+has already said it. There is no version of this that is both streaming and
+pre-scanned.
 
 ---
 

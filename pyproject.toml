@@ -46,11 +46,20 @@ think = ["best-engine-ai-helper>=0.4.0"]
 # sound card.
 play = ["sounddevice>=0.4", "numpy>=1.24"]
 all = ["discussion-helper[listen,speak,think,play]"]
+# The HTTP surface: sessions you can watch, interrupt and end, plus the
+# WebSocket that carries a remote client's audio both ways.
+server = ["fastapi>=0.110", "uvicorn>=0.29", "pydantic>=2.6", "websockets>=12"]
+# The same routes republished as agent tools. `mcp<2.0` is a pin with a
+# history: fastapi-mcp 0.4.0 against an unpinned mcp SDK raised a TypeError
+# out of create_app() — not an ImportError — and that took down a sibling's
+# entire HTTP API, not only its MCP routes.
+mcp = ["discussion-helper[server]", "fastapi-mcp>=0.3", "mcp<2.0"]
 dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6", "mypy>=1.11"]
 
 [project.scripts]
 discussion-helper = "discussion_helper.cli_click:main"
 discussion-helper-argparse = "discussion_helper.cli:main"
+discussion-helper-mcp = "discussion_helper.mcp:main"
 
 [project.urls]
 Homepage = "https://github.com/warith-harchaoui/discussion-helper"
