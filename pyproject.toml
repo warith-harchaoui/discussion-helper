@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discussion-helper"
-version = "0.2.0"
+version = "0.2.1"
 description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -59,7 +59,14 @@ listen = [
     # It read `>=0.4.4` until now — two breaking-change boundaries below the
     # 2.x published today, which is to say it claimed support for a line this
     # package has never run on.
-    "vocal-helper>=2.0.0,<3",
+    #
+    # The ceiling moved to <4 once 3.0.0 was actually run here, not merely
+    # read: its two breaking changes land elsewhere. `Pipeline.run()` raising
+    # `StageCrashed` instead of yielding nothing is what this adapter wants —
+    # a dead recogniser used to reach the responder as silence — and the
+    # pyannote default only moves the offline checkpoint, which the listening
+    # path never loads. The 63 tests pass against 3.0.0.
+    "vocal-helper>=2.0.0,<4",
     # Not imported here: it is what vocal-helper's microphone source opens.
     # Declared anyway, and at its real major, so `[listen]` resolves to a
     # combination that has been run rather than one that merely solves.

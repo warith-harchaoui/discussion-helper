@@ -1,5 +1,27 @@
 # Changelog: discussion-helper
 
+## v0.2.1 (2026-10-20): room for vocal-helper 3
+
+### Changed
+
+- **`[listen]` admits vocal-helper 3.x** — `>=2.0.0,<4` instead of `<3`.
+  The ceiling moved only after 3.0.0 was actually run here rather than read
+  about: both of its breaking changes land somewhere this package does not
+  stand. `Pipeline.run()` raising `StageCrashed` instead of yielding nothing
+  is what this adapter wanted all along — a recogniser that died used to
+  reach the responder as *silence*, which a conversation loop cannot tell
+  from a user who said nothing — and the pyannote default moves the offline
+  checkpoint, which the listening path never loads. The 63 tests pass against
+  3.0.0.
+
+  Left at `<3`, `pip install discussion-helper[listen]` would have pinned the
+  2.x line indefinitely while the package it exists to drive moved on.
+
+### Note
+
+v0.2.0 was published to PyPI on 2026-10-19 without a git tag. The tag now
+exists and points at `9503c0a`, the commit that wheel was built from.
+
 ## v0.2.0 (2026-10-19): the microphone was never connected
 
 Joining the AI Helpers suite, and the audit that came with it found that the
