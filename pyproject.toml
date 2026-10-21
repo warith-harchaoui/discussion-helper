@@ -129,5 +129,17 @@ target-version = "py310"
 select = ["E", "F", "I", "UP", "B", "W"]
 
 [tool.mypy]
-python_version = "3.10"
+# Targets 3.12, while the package itself supports 3.10 (`requires-python`
+# above). Not a preference: NumPy ships its stubs in PEP 695 syntax
+# (`type X = ...`), which mypy can only *parse* when targeting 3.12 or later,
+# and a syntax error inside a stub cannot be suppressed — `ignore_errors`,
+# `follow_imports = "skip"` and `exclude` were all measured here on
+# 2026-10-21 against numpy 2.5.4 and none of them silence it. So the choice
+# was mypy targeting 3.12 or mypy not running at all.
+#
+# What this costs: mypy no longer flags 3.11+ syntax or stdlib used in code
+# that promises 3.10. Nothing else covers that today — CI runs a single 3.12
+# job — so it is a real gap, recorded rather than hidden. Closing it means
+# exercising the floor where it actually shows: a 3.10 test job.
+python_version = "3.12"
 ignore_missing_imports = true
