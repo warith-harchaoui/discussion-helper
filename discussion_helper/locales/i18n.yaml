@@ -1,0 +1,37 @@
+# Human-language source of truth for discussion-helper.
+#
+# `prompts:` holds the instructions given to the language model that answers.
+# Read by `os_helper.Prompts`, the loader shared across the suite
+# (CODING.md 21.3), which also validates that every language carries the same
+# `{placeholder}` fields.
+#
+# These are NOT translations of each other. A prompt is written for the model
+# in the language it must answer in: the French version says what makes a
+# French model answer in spoken register, which is not the French words of the
+# English sentence. That is also why they live here keyed on meaning rather
+# than in a gettext catalogue keyed on the English text — see
+# `os_helper.prompts_utils` for the reasoning.
+#
+# There is no `gui:` section: this package has no GUI. It listens and speaks.
+
+meta:
+  default_locale: en
+  supported_locales:
+  - en
+  - fr
+
+prompts:
+  # The instruction every answer is generated under. Its job is to keep the
+  # reply sayable: a list or a heading cannot be heard, and on a non-streaming
+  # client the length of the answer IS the latency the user waits through.
+  default_system:
+    en: >-
+      You are speaking out loud, not writing. Answer in one or two short
+      sentences. No lists, no markdown, no headings — none of it can be heard.
+      If the question needs a long answer, give the short one and offer to go
+      further.
+    fr: >-
+      Vous parlez à voix haute, vous n'écrivez pas. Répondez en une ou deux
+      phrases courtes. Ni liste, ni markdown, ni titre : rien de tout cela ne
+      s'entend. Si la question appelle une longue réponse, donnez la courte et
+      proposez d'aller plus loin.

@@ -27,9 +27,13 @@ Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 from __future__ import annotations
 
 import asyncio
+import functools
 import re
 import time
 from collections.abc import AsyncIterator
+from pathlib import Path
+
+import os_helper as osh
 
 from discussion_helper.types import SpokenSentence, Utterance
 
@@ -191,6 +195,33 @@ class VocalListener:
             await closing()
 
 
+@functools.lru_cache(maxsize=1)
+def _prompts() -> osh.Prompts:
+    """The shared prompt loader, bound to this package's locale file."""
+    return osh.Prompts.from_path(Path(__file__).resolve().parent / "locales" / "i18n.yaml")
+
+
+def default_system(language: str = "") -> str:
+    """The instruction every answer is generated under, in *language*.
+
+    Written per language rather than translated: what makes a model answer in
+    spoken French register is not the French words of the English sentence.
+    A language with no prompt falls back to English, and a regional tag finds
+    its base language, both through :class:`os_helper.Prompts`.
+
+    Parameters
+    ----------
+    language : str
+        Language code; empty means the file's default.
+
+    Returns
+    -------
+    str
+        The system prompt.
+    """
+    return _prompts().text("default_system", language or None)
+
+
 class LocalResponder:
     """Answers, with whatever model fits this machine.
 
@@ -222,15 +253,15 @@ class LocalResponder:
     reading whole sentences rather than clauses.
     """
 
-    DEFAULT_SYSTEM = (
-        "You are speaking out loud, not writing. Answer in one or two short "
-        "sentences. No lists, no markdown, no headings — none of it can be "
-        "heard. If the question needs a long answer, give the short one and "
-        "offer to go further."
-    )
-
-    def __init__(self, *, system: str = "", max_sentences: int = 4, stream: bool = True) -> None:
-        self.system = system or self.DEFAULT_SYSTEM
+    def __init__(
+        self,
+        *,
+        system: str = "",
+        max_sentences: int = 4,
+        stream: bool = True,
+        language: str = "",
+    ) -> None:
+        self.system = system or default_system(language)
         self.max_sentences = max_sentences
         self.stream = stream
 

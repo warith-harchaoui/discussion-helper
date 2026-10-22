@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discussion-helper"
-version = "0.2.1"
+version = "0.3.0"
 description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -35,7 +35,7 @@ dependencies = [
     # (`init_logging`, `warning`) are not worth a surprise traceback at import
     # time. The floor is 2.0.0 rather than the 1.7.2 declared until now, which
     # claimed support for a line this package has never once been tested on.
-    "os-helper>=2.0.0,<3",
+    "os-helper>=2.9.0,<3",
     # `discussion-helper` — the headline command, the one the README tells you
     # to run — is the click front door. Until 0.1.0 click was declared nowhere:
     # not a dependency, not an extra, so `pip install discussion-helper` put a
@@ -115,6 +115,14 @@ Issues = "https://github.com/warith-harchaoui/discussion-helper/issues"
 
 [tool.setuptools.packages.find]
 include = ["discussion_helper*"]
+
+[tool.setuptools.package-data]
+# The prompt catalogue travels with the package: living inside
+# discussion_helper/ is necessary, declaring it here is what ships it.
+# Without this line the wheel carries no locales at all and every answer is
+# generated under the English prompt, however the caller asked — while a
+# source checkout works perfectly, because the file is on disk either way.
+"discussion_helper" = ["locales/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

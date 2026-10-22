@@ -1,5 +1,40 @@
 # Changelog: discussion-helper
 
+## v0.3.0 (2026-10-22): the spoken prompt speaks French too
+
+### Added
+
+- **The system prompt now exists in French**, in
+  `discussion_helper/locales/i18n.yaml`, read through `os_helper.Prompts` —
+  the prompt loader the suite shares as of os-helper 2.9.0. Pass
+  `LocalResponder(language="fr")`, or call `default_system("fr")`.
+
+  For a package whose whole job is holding a spoken conversation, an
+  English-only instruction was a real defect rather than a missing nicety: a
+  model told "You are speaking out loud, not writing" answers a French
+  speaker in English, or in written-register French. The two versions are
+  **written per language, not translated** — what makes a model answer in
+  spoken French is not the French words of the English sentence.
+
+  A regional tag reaches its base language (`fr-CA` → `fr`) and an unknown
+  one falls back to English, both through the shared loader.
+
+### Changed
+
+- The prompt moved out of `LocalResponder.DEFAULT_SYSTEM`, a hardcoded class
+  attribute, into the catalogue. An explicit `system=` argument still wins
+  over everything.
+
+### Fixed
+
+- **The catalogue would not have shipped.** This package declared no
+  `[tool.setuptools.package-data]` at all, so the new `locales/i18n.yaml` was
+  absent from the built wheel — verified by building one — and every answer
+  would have been generated under the English prompt however the caller
+  asked, while a source checkout worked perfectly. Declared, and held by a
+  test that reads the build config plus one that asks git whether the file is
+  tracked.
+
 ## v0.2.1 (2026-10-20): room for vocal-helper 3
 
 ### Changed
