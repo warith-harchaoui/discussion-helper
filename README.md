@@ -28,7 +28,7 @@ three, and the three questions it has to get right:
   and nothing about why. Every exchange reports its breakdown — endpointing,
   recognition, first token, first audio — and names the stage to fix.
 
-## The promise
+## The Promise
 
 **Local-first.** The microphone, the recogniser, the model and the voice all
 run on your machine. No audio leaves it, no account, no per-minute billing.
@@ -39,7 +39,7 @@ tidiness: interruption handling is exactly the behaviour a real room makes
 impossible to assert. You cannot *hear* whether the queued audio was
 discarded.
 
-## Install
+## Installation
 
 ```bash
 pip install 'discussion-helper[all]'      # hearing, thinking, speaking, playing
