@@ -52,15 +52,14 @@ reading a short one.
 
 ### Dependencies
 
-`os-helper` and `click` at base — the click door *is* the headline command here,
-so it is not behind an extra. Everything that hears, thinks or speaks is
+`os-helper` and `click` at base — the command line is built with click and is
+not optional, so neither is click. Everything that hears, thinks or speaks is
 optional.
 
-## 2. CLIs — click (headline) and argparse
+## 2. CLI — click
 
-`discussion-helper` (click) and `discussion-helper-argparse`, both over one
-shared handler table so a command cannot exist on one door and not the other.
-Two commands: `talk` and `rehearse`. See `cli-reference.md`.
+`discussion-helper`, with two commands: `talk` and `rehearse`. One command
+line, one parser. See `cli-reference.md`.
 
 ## 3. HTTP API — FastAPI (`[server]`)
 

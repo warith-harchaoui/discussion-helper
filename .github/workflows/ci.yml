@@ -66,10 +66,10 @@ jobs:
         run: mypy discussion_helper
       - name: Run tests
         run: python -m pytest -q
-      - name: Both front doors respond
+      - name: The command line responds
         run: |
           discussion-helper --version
-          discussion-helper-argparse --version
+          discussion-helper -h
       - name: The loop runs with nothing installed behind it
         # The first command anybody should reach for, and the one that answers
         # "is it the loop or is it the room". If this fails, the room is

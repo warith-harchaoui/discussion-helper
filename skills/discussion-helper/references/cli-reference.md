@@ -1,13 +1,11 @@
 # discussion-helper CLI reference
 
-Two front doors over one shared handler table: `discussion-helper` (click, the
-headline command) and `discussion-helper-argparse` (standard library only).
-Every command and option below exists identically on both — a test asserts it,
-because a command on one door and not the other is the failure a twin invites.
+One command line, `discussion-helper`, built with click, with two commands:
+`rehearse` and `talk`.
 
 ```bash
-discussion-helper --help
-discussion-helper --version
+discussion-helper --help      # -h works too
+discussion-helper -V          # or --version
 ```
 
 ## `rehearse` — start here
@@ -93,7 +91,7 @@ over the *user*, read the latency breakdown instead.
 ## Reading the result
 
 Both commands report a per-exchange latency breakdown rather than a total, and
-name the `slowest_stage` — on every door: the text output, `--json`, and the
+name the `slowest_stage` — on every surface: the text output, `--json`, and the
 HTTP event stream all carry the same six fields.
 
 The number to watch is **time to first audio**, not total speaking time: a fast

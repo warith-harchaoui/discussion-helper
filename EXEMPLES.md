@@ -422,8 +422,7 @@ discussion-helper talk --no-barge-in          # strict half-duplex
 discussion-helper talk --json                 # machine-readable
 ```
 
-`discussion-helper-argparse` offre les mêmes commandes avec la seule
-bibliothèque standard. Voir
+Toutes les options des deux commandes sont dans
 `skills/discussion-helper/references/cli-reference.md`.
 
 ## 12. HTTP et un agent qui peut interrompre

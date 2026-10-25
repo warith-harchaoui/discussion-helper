@@ -88,8 +88,12 @@ def _is_stdlib(name: str) -> bool:
 
 
 def test_there_are_console_scripts_to_check() -> None:
-    """A regex that stops matching would make the test below vacuous."""
-    assert len(_console_scripts()) >= 3, _console_scripts()
+    """A regex that stops matching would make the test below vacuous.
+
+    Two since 0.4.0: the command line and the MCP launcher. The third was a
+    second door over the same two commands, deleted with the parser behind it.
+    """
+    assert len(_console_scripts()) >= 2, _console_scripts()
 
 
 @pytest.mark.parametrize("command", sorted(_console_scripts()), ids=lambda c: c)

@@ -1,5 +1,99 @@
 # Changelog: discussion-helper
 
+## v0.4.0 (2026-10-25): one command line, built with click
+
+### Changed
+
+- **One command line, and it is the click one.** `discussion-helper` now runs
+  the click implementation and is the only CLI this package ships;
+  `discussion-helper-argparse` and the parser behind it are gone. `click` was
+  already a base dependency rather than an extra, so a plain
+  `pip install discussion-helper` carries the command exactly as before —
+  there is no `[cli]` extra here to remove.
+
+  A name that advertises the parsing library describes the implementation, not
+  the interface, and two parsers over two commands cost more to keep in step
+  than the second door was worth.
+
+- **The handlers moved before the file was deleted.** They were never in the
+  click module: `_policy`, `_report`, `_cmd_talk` and `_cmd_rehearse` all
+  lived in the argparse half, and the click half imported them across the
+  module boundary. Deleting the module the suffixed command pointed at would
+  have taken the surviving CLI's whole body with it. `_report` and `_policy`
+  carried over unchanged; the two command bodies now read their own click
+  parameters instead of an `argparse.Namespace` assembled to look like what
+  the other parser produced.
+
+- `cli_click.py` is now `cli.py`, and the argparse module is deleted with the
+  parser declaration, the `_version_string` helper, the `_HANDLERS` table and
+  the `main(argv)` dispatcher: 398 lines across two modules became 276 in one.
+
+- `click` capped below 9, which it never was here, matching the rest of the
+  suite. The decorators this CLI is written against (`group`,
+  `version_option`, `argument(nargs=-1)`) are exactly what a major bump is
+  allowed to move, and the dependency is no longer one an extra could shield.
+
+- `os-helper` cap widened to `<4`. os-helper 3.0.0 is the release that deleted
+  its own command line and nothing else; the three names this package reads —
+  `init_logging`, `warning`, `Prompts` — are all still exported, and none of
+  them was ever reached through a shell. The floor stays at 2.9.0, where
+  `Prompts` landed.
+
+### Fixed
+
+- **The surviving `--help` had lost the examples.** The argparse door carried
+  an epilog with three worked command lines and the pointer to KNOWLEDGE.md;
+  the click door never had one, so the help on the command everybody actually
+  runs was a bare option list. Found by running `--help` rather than reading
+  it. Ported, with a `\b` line so click stops reflowing the block into a
+  paragraph.
+
+- **Four flags had been documented on one door and not the other.** The click
+  copies of `--no-barge-in`, `--grace`, `--silence-timeout` and `--json` were
+  one-line summaries of the argparse wording, and dropped what the flag is
+  *for*: that `--no-barge-in` is correct on a speakerphone where every reply
+  would otherwise interrupt itself, that `--grace` absorbs the agent's own
+  voice when there is no echo cancellation, that an open microphone in an
+  empty room is an ordinary ending. The fuller text is now the only text, and
+  `show_default=True` restores the defaults argparse printed with
+  `%(default)s` and click was not showing at all.
+
+- `-V` had no short form on the click door until earlier today (`249ba0a`,
+  unreleased). It ships here, with the version read from `__version__` rather
+  than from the installed distribution's metadata — which reports whatever was
+  last pip-installed, a step behind the code in every editable checkout.
+
+### Tests
+
+73 pass, down from 74. The two twin-drift tests — the two doors offering the
+same commands, the two doors reporting the same version — had nothing left to
+compare, and `test_the_command_imports_on_a_bare_install` lost one
+parametrised case with the third console script.
+
+What replaced them is stronger than what went: the command list is now
+asserted against a literal (`{"talk", "rehearse"}`, the only place that says
+out loud what the CLI offers), and the handler-table test, which only ever
+read a dict, became a `CliRunner` call that stages a barge-in and checks the
+JSON transcript comes back cut off with an `interruption_rate` of 1.0. Both
+new guards were proven by breaking what they watch: sabotaging `rehearse` into
+a no-op and pointing `version_option` back at the install metadata each turn
+the matching test red. No scenario existed only on the argparse side, so
+nothing was dropped.
+
+### Migration
+
+`discussion-helper-argparse <cmd>` becomes `discussion-helper <cmd>` — same
+two commands, same flags, same output. `pip install "discussion-helper[cli]"`
+fails on an unknown extra, as it always did here: the CLI has never been
+optional in this package.
+
+### Also in this release
+
+Changes made since v0.3.0 and unreleased until now: `EXEMPLES.md`, the French
+twin of the cookbook; a CI job that runs the declared 3.10 floor instead of
+only 3.12; and README's "The Promise" and "Installation" sections brought into
+line with the rest of the suite.
+
 ## v0.3.0 (2026-10-22): the spoken prompt speaks French too
 
 ### Added

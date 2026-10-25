@@ -312,36 +312,50 @@ def test_the_spoken_reply_asks_for_speech_not_prose() -> None:
     assert "markdown" in system
 
 
-# ── The two front doors ────────────────────────────────────────────────────
+# ── The command line ───────────────────────────────────────────────────────
 
 
-def test_the_two_front_doors_offer_the_same_commands() -> None:
-    """A command on one and not the other is the failure a twin invites."""
+def test_the_command_line_offers_both_commands() -> None:
+    """A command that drops out of the group is a feature nobody can reach.
+
+    Until 0.4.0 every command was declared twice, once per parser, and this
+    test compared the two lists against each other. With one door left the
+    list it compares against is written here — which makes this the only
+    place that says out loud what the command line is meant to offer.
+    """
     import click
 
-    from discussion_helper.cli import build_parser
-    from discussion_helper.cli_click import cli
+    from discussion_helper.cli import cli
 
-    argparse_commands: set[str] = set()
-    for action in build_parser()._actions:
-        if getattr(action, "choices", None) and isinstance(action.choices, dict):
-            argparse_commands |= set(action.choices)
     with click.Context(cli) as ctx:
-        click_commands = set(cli.list_commands(ctx))
-
-    assert argparse_commands and argparse_commands == click_commands
+        assert set(cli.list_commands(ctx)) == {"talk", "rehearse"}
 
 
-def test_every_command_has_a_handler() -> None:
-    """A sub-command the dispatcher does not know parses and then does nothing."""
-    from discussion_helper.cli import build_parser
-    from discussion_helper.cli_click import _HANDLERS
+def test_the_rehearse_command_actually_runs_the_loop() -> None:
+    """A command that parses and then does nothing is the failure to catch.
 
-    declared: set[str] = set()
-    for action in build_parser()._actions:
-        if getattr(action, "choices", None) and isinstance(action.choices, dict):
-            declared |= set(action.choices)
-    assert declared <= set(_HANDLERS)
+    A handler table used to sit between the two parsers and the work, and a
+    test read it to check every command had an entry. Reading a table proves
+    less than running the command: this stages an interruption and checks the
+    transcript came back cut off, which exercises the parser, the policy the
+    flags describe, the loop and the JSON report in one call.
+    """
+    import json
+
+    from click.testing import CliRunner
+
+    from discussion_helper.cli import cli
+
+    done = CliRunner().invoke(
+        cli,
+        ["rehearse", "bonjour", "--sentences", "5", "--interrupt-after", "0.2", "--json"],
+    )
+    assert done.exit_code == 0, done.output
+    payload = json.loads(done.output)
+    assert [u["speaker"] for u in payload["utterances"]] == ["user", "agent"]
+    assert payload["utterances"][1]["interrupted"] is True
+    assert payload["interruption_rate"] == 1.0
+    assert payload["timings"][0]["slowest_stage"]
 
 
 def test_every_declared_command_points_at_something_importable() -> None:
@@ -532,18 +546,19 @@ def test_every_door_reports_the_same_latency_breakdown() -> None:
     }
 
 
-def test_both_front_doors_report_the_same_version() -> None:
+def test_the_version_flag_reports_the_package_not_the_install() -> None:
     """Three places can state this package's version; they must not disagree.
 
-    `pyproject.toml`, `__version__`, and the installed distribution's metadata.
-    The click door used to read the third via `version_option(package_name=...)`
-    while the argparse door read the second, so the two answered from different
-    sources and diverged the moment an editable install fell a step behind the
-    code -- the normal state mid-development. Measured before the fix: click
-    said 0.1.0 while argparse said 0.2.0, in the same checkout.
+    `pyproject.toml`, `__version__`, and the installed distribution's
+    metadata. `click.version_option(package_name=...)` reads the third, which
+    is whatever was last pip-installed -- a step behind the code in every
+    editable checkout. Measured while there were still two doors: click said
+    0.1.0 and the other door, reading `__version__`, said 0.2.0, in the same
+    tree. So the number is passed to `version_option` explicitly, and the
+    check here runs the command rather than reading the source.
 
-    Only the number is compared. The surrounding wording is each framework's
-    own ("prog, version X" against "prog X") and is not worth forcing.
+    `-V` rather than `--version`, because the short form is the one people
+    type and nothing else proves it is wired up.
     """
     import re
     import subprocess
@@ -551,15 +566,12 @@ def test_both_front_doors_report_the_same_version() -> None:
 
     import discussion_helper
 
-    seen = []
-    for module in ("discussion_helper.cli_click", "discussion_helper.cli"):
-        done = subprocess.run(
-            [sys.executable, "-c", f"import {module} as m; m.main()", "--version"],
-            capture_output=True,
-            text=True,
-        )
-        found = re.search(r"\d+\.\d+\.\d+", done.stdout + done.stderr)
-        assert found, (module, done.stdout, done.stderr)
-        seen.append(found.group(0))
-
-    assert seen[0] == seen[1] == discussion_helper.__version__, seen
+    done = subprocess.run(
+        [sys.executable, "-c", "import discussion_helper.cli as m; m.main()", "-V"],
+        capture_output=True,
+        text=True,
+    )
+    assert done.returncode == 0, (done.stdout, done.stderr)
+    found = re.search(r"\d+\.\d+\.\d+", done.stdout)
+    assert found, (done.stdout, done.stderr)
+    assert found.group(0) == discussion_helper.__version__, done.stdout

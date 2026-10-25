@@ -412,8 +412,8 @@ discussion-helper talk --no-barge-in          # strict half-duplex
 discussion-helper talk --json                 # machine-readable
 ```
 
-`discussion-helper-argparse` is the same commands over the standard library
-alone. See `skills/discussion-helper/references/cli-reference.md`.
+Every option of both commands is in
+`skills/discussion-helper/references/cli-reference.md`.
 
 ## 12. HTTP, and an agent that can interrupt
 

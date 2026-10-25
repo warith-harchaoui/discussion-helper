@@ -71,7 +71,6 @@ somebody is going to *answer back*, and the machine has to stop when they do.
 ### The names
 
 - `discussion-helper`
-- `discussion-helper-argparse`
 - `discussion-helper-mcp`
 - `import discussion_helper`
 - `Discussion(...)`
