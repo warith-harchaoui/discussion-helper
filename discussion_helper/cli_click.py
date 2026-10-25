@@ -73,7 +73,9 @@ def _common(function):  # type: ignore[no-untyped-def]
 # is every editable checkout mid-development. Measured here: click said 0.1.0
 # while argparse said 0.2.0. A suite whose premise is that the two doors agree
 # cannot have them disagreeing about what version they are.
-@click.version_option(version=__version__, package_name="discussion-helper")
+# ``-V`` as well as ``--version``: the argparse door offered both, and the
+# short form is the one people actually type.
+@click.version_option(__version__, "-V", "--version", package_name="discussion-helper")
 def cli() -> None:  # pragma: no cover - click dispatches
     """Front door over the two commands."""
 
