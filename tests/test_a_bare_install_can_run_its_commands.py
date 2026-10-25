@@ -126,3 +126,46 @@ def test_the_optional_surfaces_guard_their_imports() -> None:
         "guard the command dies on an import rather than naming the extra"
     )
     assert "discussion-helper[mcp]" in source, "the guard has to name the extra that fixes it"
+
+
+def test_the_mcp_launcher_returns_its_exit_code_instead_of_raising() -> None:
+    """`discussion-helper-mcp` is `mcp:main`, so the code has to come back.
+
+    `[project.scripts]` calls that function and uses whatever it returns as
+    the process status. click exits by raising, which is why `main` drives it
+    with `standalone_mode=False`: without that, `--help` would leave through
+    SystemExit and a bad flag through a UsageError, and the declared `-> int`
+    would be a fiction. Both spellings of help, because `-h` is wired by hand
+    through `help_option_names` and is the one people type.
+    """
+    from discussion_helper import mcp
+
+    for flag in ("-h", "--help"):
+        assert mcp.main([flag]) == 0, f"{flag} has to return 0, not raise"
+    assert mcp.main(["--no-such-flag"]) == 2, "a bad flag is a usage error, exit 2"
+
+
+def test_the_mcp_launcher_names_the_extra_instead_of_tracebacking() -> None:
+    """Without `[mcp]` the command says which extra, and returns non-zero.
+
+    The guard above is checked in the source; this checks what it does. The
+    missing extra is simulated rather than uninstalled, because uvicorn is not
+    the subject — somebody who typed the command has never heard of it, so a
+    traceback naming it is not an error message.
+    """
+    import builtins
+
+    from discussion_helper import mcp
+
+    real_import = builtins.__import__
+
+    def without_uvicorn(name, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if name == "uvicorn":
+            raise ImportError("simulated: the [mcp] extra is not installed")
+        return real_import(name, *args, **kwargs)
+
+    builtins.__import__ = without_uvicorn
+    try:
+        assert mcp.main([]) == 2
+    finally:
+        builtins.__import__ = real_import

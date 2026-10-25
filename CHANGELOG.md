@@ -1,5 +1,42 @@
 # Changelog: discussion-helper
 
+## v0.4.1 (2026-10-25): the MCP launcher joins the click one
+
+### Changed
+
+- **`discussion-helper-mcp` was still argparse.** v0.4.0 put *the* command
+  line on click and left the second console script behind, so the wheel
+  published yesterday ships two parsing libraries and two answers to `-h`:
+  `discussion-helper -h` prints help, `discussion-helper-mcp -h` answered
+  `unrecognized arguments: -h`. Both are click now, both carry
+  `help_option_names = ["-h", "--help"]`.
+
+  Nothing a reader types changed. `--host` and `--port` keep their spellings
+  and their defaults — the Dockerfile's `CMD` passes them, and the README, the
+  LISEZMOI and `references/surfaces.md` all name the command — and
+  `main(argv)` still **returns** an exit code rather than exiting, which is
+  what `[project.scripts]` calls. click runs with `standalone_mode=False` for
+  exactly that reason: left to itself it exits by raising, and a console
+  script that raises instead of returning its code is a different contract.
+
+  Two improvements come with the move. The environment defaults
+  (`DISCUSSION_HELPER_MCP_HOST`, `DISCUSSION_HELPER_MCP_PORT`) are `envvar=`
+  declarations rather than `os.environ.get` calls, so they are read per
+  invocation instead of once at import, and they appear in `--help`. And a
+  non-numeric `DISCUSSION_HELPER_MCP_PORT` used to raise `ValueError` out of
+  `int()` while the parser was still being built — before `--help` could
+  print — where it now reports `Invalid value for '--port'` and exits 2.
+
+  `argparse` is now imported nowhere in this package.
+
+### Added
+
+- `tests/test_a_bare_install_can_run_its_commands.py` covers what the launcher
+  *does*, not only how its source reads: `main` returns `0` for `-h` and
+  `--help` and `2` for an unknown flag rather than raising, and a missing
+  `[mcp]` extra returns `2` after naming the extra. Proven by breaking them —
+  `standalone_mode=True` turns the first red.
+
 ## v0.4.0 (2026-10-25): one command line, built with click
 
 ### Changed
