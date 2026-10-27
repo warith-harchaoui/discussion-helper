@@ -112,7 +112,7 @@ connecteur ; le tour de parole n'est pas son problème.
 essaie en premier : locale, trivialement en forme de bibliothèque, bloquante
 de bout en bout, donc l'utilisateur ne peut pas interrompre du tout.
 
-## Quoi choisir quand
+## Quand choisir quoi
 
 - **`discussion-helper`** : une personne, une machine, une conversation qui
   doit s'arrêter quand elle coupe — et l'envie de lire pourquoi c'était lent.
@@ -134,3 +134,46 @@ de bout en bout, donc l'utilisateur ne peut pas interrompre du tout.
   parole ; l'essentiel du trafic est du texte.
 - **`speech_recognition` + `pyttsx3`** : une démonstration où personne
   n'interrompra.
+
+## Sources et date de relevé
+
+**Relevé le 27/10/2026.** Les étoiles sont un jugement d'adéquation à *cette*
+niche — une boucle de conversation en forme de bibliothèque, locale d'abord,
+dont le comportement d'interruption est juste et observable — pas un résultat
+de banc d'essai. Elles ont été attribuées en lisant la documentation de chaque
+projet, puis son code quand il est public. Rien de ce tableau n'a été
+chronométré ici : aucun chiffre de latence, de débit ni de version n'est donc
+cité contre le logiciel de quelqu'un d'autre. Ce sont exactement les
+affirmations qui pourrissent jusqu'à devenir fausses au sujet d'autrui.
+
+| Projet | Lu dans |
+|---|---|
+| LiveKit Agents | [docs.livekit.io/agents](https://docs.livekit.io/agents/) · [détecteur de tour](https://docs.livekit.io/agents/build/turns/turn-detector/) |
+| Pipecat | [docs.pipecat.ai](https://docs.pipecat.ai/) |
+| API Realtime d'OpenAI | [platform.openai.com — Realtime](https://platform.openai.com/docs/guides/realtime) |
+| Vocode | [vocodedev/vocode-core](https://github.com/vocodedev/vocode-core) |
+| Vapi | [docs.vapi.ai](https://docs.vapi.ai/) |
+| Amazon Lex | [docs.aws.amazon.com/lex](https://docs.aws.amazon.com/lex/) |
+| Rasa | [rasa.com/docs](https://rasa.com/docs/) |
+| `speech_recognition` + `pyttsx3` | [SpeechRecognition](https://pypi.org/project/SpeechRecognition/) · [pyttsx3](https://pypi.org/project/pyttsx3/) |
+
+La ligne de `discussion-helper` se lit dans ce dépôt plutôt qu'elle ne
+s'affirme. *Interruption qui jette l'audio en attente*, c'est
+`tests/test_the_floor.py::test_what_was_queued_and_not_heard_is_discarded` :
+il met en scène une coupure dans une réponse de cinq phrases puis exige que la
+phrase atteinte compte comme commencée et non comme dite, les quatre suivantes
+ne démarrant jamais. Son voisin `test_the_interruption_is_fast` tient l'arrêt
+complet sous 150 ms face à une phrase d'une seconde. *Testable sans matériel*,
+c'est la suite de tests elle-même, qui tourne sans micro, sans modèle ni carte
+son. *Décomposition de latence par étape*, c'est `TurnTiming.as_dict()` — les
+six mêmes champs que rendent le `--json` de la ligne de commande et le flux
+d'événements HTTP. Le ⭐ en *Téléphonie et montée en charge* se mesure dans le
+seul sens disponible : il n'y a ici de code ni pour l'une ni pour l'autre.
+
+Les chiffres publiés face auxquels ce paquet a été conçu — le budget de 800 ms,
+la barre de 150 ms pour l'interruption, la baisse rapportée de 39 % des fausses
+interruptions quand la fin de tour sémantique est fusionnée avec la détection
+d'activité vocale — appartiennent à d'autres ; chacun est cité individuellement
+dans
+[KNOWLEDGE.md § Sources](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md#sources).
+Ils ne sont pas refaits ici.

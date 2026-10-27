@@ -12,9 +12,10 @@
 **Tenir une conversation parlée au micro : écouter, répondre, parler — et se
 taire à l'instant où l'on vous coupe.**
 
-`vocal-helper` entend. `speaker-helper` parle. Un modèle local répond. Aucun
-des trois ne sait à qui est le tour. Ce paquet est la boucle entre les trois,
-et les trois questions qu'elle doit trancher :
+`vocal-helper` entend. `speaker-helper` parle. Un modèle local répond, choisi
+par `best-engine-ai-helper`, qui mesure la machine : aucun nom de modèle n'est
+écrit ici. Aucun des trois ne sait à qui est le tour. Ce paquet est la boucle
+entre eux, plus les trois questions qu'elle doit trancher :
 
 - **Qui a la parole.** Une seule partie à la fois. La plupart des ratés d'un
   agent vocal sont deux parties qui croient l'avoir — l'agent qui parle
@@ -51,17 +52,51 @@ speaker-helper install-voice --engine kokoro   # les poids de la voix, une fois
 Sous Linux et macOS il faut aussi `espeak-ng` (`apt install espeak-ng`,
 `brew install espeak-ng`).
 
-## L'essayer sans rien installer
+Chaque moitié s'installe seule si vous n'en voulez qu'une partie : `[listen]`,
+`[think]`, `[speak]`, `[play]`.
+
+## Prise en main rapide
+
+La boucle tourne sur une installation nue — sans modèle, sans micro, sans
+carte son. Les trois parties sont des protocoles et le paquet livre une
+doublure connue-bonne de chacune : il y a donc une conversation à regarder
+avant d'avoir téléchargé le moindre poids.
 
 ```bash
 pip install discussion-helper
-discussion-helper rehearse "bonjour" "comment ça va ?"
+discussion-helper rehearse 'bonjour' 'ça va ?'
 ```
 
-`rehearse` fait tourner **la même boucle** avec le micro, le modèle et le
-haut-parleur remplacés par des doublures. Quand un agent vocal se comporte
-mal, la première question est toujours « est-ce la boucle ou est-ce la
-pièce ? » ; ceci y répond en une seconde :
+```
+ you: bonjour
+  it: bonjour bonjour (2) bonjour (3)
+ you: ça va ?
+  it: ça va ? ça va ? (2) ça va ? (3)
+
+turn 1: 0 ms to first audio, slowest stage think
+turn 2: 0 ms to first audio, slowest stage think
+```
+
+Deux échanges, le tour de parole qui change quatre fois de main, la latence
+rapportée par tour avec l'étape à corriger nommée. Puis, les extras ci-dessus
+installés, la même boucle au micro :
+
+```bash
+discussion-helper talk
+```
+
+Parlez : il répond. Coupez-le : il se tait. `--json` remplace la prose par la
+transcription et la décomposition de latence en JSON lisible par une machine ;
+[En bibliothèque](#en-bibliothèque) donne la même conversation pilotée depuis
+Python.
+
+## Est-ce la boucle ou est-ce la pièce ?
+
+C'est la première question qu'un agent vocal fautif soulève ; sans quelque
+chose comme `rehearse`, la seule façon de la poser est de changer un réglage
+puis de réécouter. La commande fait tourner **la même boucle** avec le micro,
+le modèle et le haut-parleur remplacés par des doublures : elle sait donc
+aussi mettre l'interruption en scène.
 
 ```bash
 discussion-helper rehearse "dis-moi tout" --sentences 6 --interrupt-after 0.25 --grace 0
@@ -70,7 +105,14 @@ discussion-helper rehearse "dis-moi tout" --sentences 6 --interrupt-after 0.25 -
 ```
  you: dis-moi tout
   it: dis-moi tout dis-moi tout (2) (cut off)
+
+turn 1: 0 ms to first audio, slowest stage think
 ```
+
+`(cut off)` est la boucle qui dit que la phrase sur laquelle elle a été coupée
+ne compte **pas** comme dite. Si les six apparaissaient, la file serait en
+train de s'écouler au lieu d'être jetée — précisément ce qui donne à un agent
+l'air d'être sourd.
 
 ## Lui parler
 
@@ -184,7 +226,7 @@ ressemble exactement à l'utilisateur qui parle.
 
 | Fichier | Ce qu'il contient |
 |---|---|
-| **[EXAMPLES.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/EXAMPLES.md)** | Un livre de recettes. Chaque bloc Python tourne sur une installation nue — sans micro, sans modèle ni carte son — parce que les parties sont des protocoles livrés avec leurs doublures. |
+| **[EXEMPLES.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/EXEMPLES.md)** | Un livre de recettes. Tout ce qui précède la section où arrive le vrai micro tourne sur une installation nue — sans micro, sans modèle ni carte son — parce que les parties sont des protocoles livrés avec leurs doublures. |
 | **[KNOWLEDGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md)** | Le carnet de conception, ci-dessus. |
 | **[PAYSAGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/PAYSAGE.md)** / **[LANDSCAPE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/LANDSCAPE.md)** | La place de ce paquet face à LiveKit Agents, Pipecat, l'API Realtime d'OpenAI ainsi que six autres, avec une carte de positionnement. Il obtient ⭐ en téléphonie et montée en charge : c'est la réponse honnête. |
 | **[TRIGGERS.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/TRIGGERS.md)** | Le catalogue exhaustif de ce qui doit — et ne doit pas — mener à ce helper. Recopié dans la compétence d'agent, avec une barrière qui échoue dès que les deux divergent. |
@@ -197,6 +239,7 @@ ressemble exactement à l'utilisateur qui parle.
 | Un enregistrement que quelqu'un veut en texte | [`vocal-helper`](https://github.com/warith-harchaoui/vocal-helper) |
 | Du texte que quelqu'un veut en parole | [`speaker-helper`](https://github.com/warith-harchaoui/speaker-helper) |
 | Une caméra ou un micro en direct, en trames | [`capture-helper`](https://github.com/warith-harchaoui/capture-helper) |
+| Une question qu'un modèle local doit trancher | [`best-engine-ai-helper`](https://github.com/warith-harchaoui/best-engine-ai-helper) |
 | **Une conversation à tenir** | celui-ci |
 
 La ligne de partage qui évite la plupart des erreurs : **lire quelque chose à

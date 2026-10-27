@@ -1,5 +1,40 @@
 # Changelog: discussion-helper
 
+## Unreleased
+
+### Documentation
+
+- **The six documents now carry the suite spine** (CODING.md 16–18). The
+  README and the LISEZMOI gained a real `## Quick start` /
+  `## Prise en main rapide` — the shortest path from `pip install` to a
+  conversation on screen, with the transcript it actually prints — and the
+  rehearsal section that used to stand in for one keeps the part only it could
+  say: staging the interruption, and reading `(cut off)` as proof the queue was
+  discarded rather than drained.
+
+- **LANDSCAPE and PAYSAGE say where their stars came from.** A comparison with
+  undated claims about other people's software is the one document that rots
+  into being wrong about somebody, so `## Sources and as-of date` /
+  `## Sources et date de relevé` names the date it was read, links each
+  project's own documentation, and points `discussion-helper`'s own column at
+  the tests that assert it. No competitor version number and no benchmark
+  figure is quoted, because none was measured here.
+
+- **EXAMPLES and EXEMPLES gained a `## Setup`, a `## Command line` and a
+  `## Troubleshooting`,** and the HTTP section is now correct. It told readers
+  to run `python -m discussion_helper.api`, which has never worked: the module
+  is an ASGI factory with no `__main__`, so that command exits 0 having served
+  nothing. It also showed `curl -X POST /sessions` with no body, which answers
+  `422`. Both are replaced by commands that were run — `uvicorn
+  discussion_helper.api:build --factory`, and the `fake` transport driven end
+  to end — with the real JSON pasted in. `references/surfaces.md` carried the
+  same wrong launch line and is fixed with them.
+
+- **The README names where the model comes from.** Nothing here hardcodes one:
+  `LocalResponder` calls `best_engine_ai_helper.llm.chat_stream`, and which
+  model fits the machine is `best-engine-ai-helper`'s decision. That was true
+  in the code and absent from the entry point.
+
 ## v0.4.1 (2026-10-25): the MCP launcher joins the click one
 
 ### Changed

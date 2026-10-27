@@ -65,7 +65,7 @@ line, one parser. See `cli-reference.md`.
 
 ```bash
 pip install 'discussion-helper[server]'
-python -m discussion_helper.api     # 127.0.0.1:8000, OpenAPI docs at /docs
+uvicorn discussion_helper.api:build --factory   # 127.0.0.1:8000, docs at /docs
 ```
 
 | Method | Route | `operation_id` |

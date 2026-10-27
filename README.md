@@ -12,9 +12,10 @@ developed for building Artificial Intelligence.
 **Hold a spoken conversation at the microphone: listen, answer, speak — and
 stop the moment the user cuts in.**
 
-`vocal-helper` hears. `speaker-helper` speaks. A local language model answers.
-None of them knows whose turn it is. This package is the loop between the
-three, and the three questions it has to get right:
+`vocal-helper` hears. `speaker-helper` speaks. A local language model answers,
+chosen by `best-engine-ai-helper`, which sizes the machine — no model name is
+written down here. None of the three knows whose turn it is. This package is
+the loop between them, and the three questions it has to get right:
 
 - **Who holds the floor.** Exactly one party at a time. Most voice-agent
   failures are two parties believing they hold it — the agent talking over the
@@ -52,16 +53,45 @@ On Linux and macOS the voice also needs `espeak-ng`
 Each half installs on its own if you only want some of it: `[listen]`,
 `[think]`, `[speak]`, `[play]`.
 
-## Try it with nothing installed
+## Quick start
+
+The loop runs on a bare install — no model, no microphone, no sound card. The
+three parts are protocols and the package ships a known-good fake of each, so
+there is a conversation to look at before any weights are downloaded:
 
 ```bash
 pip install discussion-helper
-discussion-helper rehearse "bonjour" "comment ça va ?"
+discussion-helper rehearse 'bonjour' 'ça va ?'
 ```
 
-`rehearse` runs the **same loop** with the microphone, model and speaker
-replaced by fakes. When a voice agent misbehaves the first question is always
-"is it the loop or is it the room", and this answers it in a second:
+```
+ you: bonjour
+  it: bonjour bonjour (2) bonjour (3)
+ you: ça va ?
+  it: ça va ? ça va ? (2) ça va ? (3)
+
+turn 1: 0 ms to first audio, slowest stage think
+turn 2: 0 ms to first audio, slowest stage think
+```
+
+Two exchanges, the floor changing hands four times, and the latency reported
+per turn with the stage to fix named. Then, with the extras above installed,
+the same loop at the microphone:
+
+```bash
+discussion-helper talk
+```
+
+Speak, and it answers. Cut in, and it stops. `--json` replaces the prose with
+the transcript and the latency breakdown as machine-readable JSON, and
+[As a library](#as-a-library) is the same conversation driven from Python.
+
+## Is it the loop or is it the room?
+
+That is the first question a misbehaving voice agent raises, and without
+something like `rehearse` the only way to ask it is to change one thing and
+listen again. It runs the **same loop** with the microphone, model and speaker
+replaced by fakes, so it can also stage the interruption for you:
 
 ```bash
 # stage an interruption a quarter of a second into the reply
@@ -71,7 +101,13 @@ discussion-helper rehearse "dis-moi tout" --sentences 6 --interrupt-after 0.25 -
 ```
  you: dis-moi tout
   it: dis-moi tout dis-moi tout (2) (cut off)
+
+turn 1: 0 ms to first audio, slowest stage think
 ```
+
+`(cut off)` is the loop saying that the sentence it was cut on does **not**
+count as said. If all six appeared, the queue would be draining instead of
+being discarded — which is exactly what makes an agent feel deaf.
 
 ## Talk to it
 
@@ -181,7 +217,7 @@ like the user speaking.
 
 | File | What is in it |
 |---|---|
-| **[EXAMPLES.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/EXAMPLES.md)** | A cookbook. Every Python block runs on a bare install — no microphone, no model, no sound card — because the parts are protocols with shipped fakes. |
+| **[EXAMPLES.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/EXAMPLES.md)** | A cookbook. Everything up to the section where the real microphone arrives runs on a bare install — no microphone, no model, no sound card — because the parts are protocols with shipped fakes. |
 | **[KNOWLEDGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md)** | The design notebook, above. |
 | **[LANDSCAPE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/LANDSCAPE.md)** / **[PAYSAGE.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/PAYSAGE.md)** | Where this sits against LiveKit Agents, Pipecat, OpenAI's Realtime API and six others, with a positioning map. It scores ⭐ on telephony and scale, which is the honest answer. |
 | **[TRIGGERS.md](https://github.com/warith-harchaoui/discussion-helper/blob/main/TRIGGERS.md)** | The exhaustive catalogue of what should, and should not, reach for this helper. Mirrored into the agent skill, with a gate that fails when the two drift apart. |
@@ -194,6 +230,7 @@ like the user speaking.
 | A recording somebody needs as text | [`vocal-helper`](https://github.com/warith-harchaoui/vocal-helper) |
 | Text somebody needs as speech | [`speaker-helper`](https://github.com/warith-harchaoui/speaker-helper) |
 | A live camera or microphone as frames | [`capture-helper`](https://github.com/warith-harchaoui/capture-helper) |
+| A question a local model should answer | [`best-engine-ai-helper`](https://github.com/warith-harchaoui/best-engine-ai-helper) |
 | **A conversation to hold** | this one |
 
 ## What is deliberately not here

@@ -126,3 +126,45 @@ the user cannot interrupt at all.
 - **Rasa**: the hard part is *dialogue management*, not turn-taking, and most
   of your traffic is text.
 - **`speech_recognition` + `pyttsx3`**: a demo where nobody will interrupt.
+
+## Sources and as-of date
+
+**Read on 2026-10-27.** The stars are a judgement of fit to *this* niche — a
+library-shaped, local-first conversation loop whose interruption behaviour is
+correct and observable — and not a benchmark result. They were scored by
+reading each project's own documentation, and its source where that is public.
+Nothing in the table was timed on a bench here, so no latency number, no
+throughput number and no version number is quoted against anybody else's
+software: those are precisely the claims that rot into being wrong about
+somebody.
+
+| Project | Read from |
+|---|---|
+| LiveKit Agents | [docs.livekit.io/agents](https://docs.livekit.io/agents/) · [turn detector](https://docs.livekit.io/agents/build/turns/turn-detector/) |
+| Pipecat | [docs.pipecat.ai](https://docs.pipecat.ai/) |
+| OpenAI Realtime API | [platform.openai.com — Realtime](https://platform.openai.com/docs/guides/realtime) |
+| Vocode | [vocodedev/vocode-core](https://github.com/vocodedev/vocode-core) |
+| Vapi | [docs.vapi.ai](https://docs.vapi.ai/) |
+| Amazon Lex | [docs.aws.amazon.com/lex](https://docs.aws.amazon.com/lex/) |
+| Rasa | [rasa.com/docs](https://rasa.com/docs/) |
+| `speech_recognition` + `pyttsx3` | [SpeechRecognition](https://pypi.org/project/SpeechRecognition/) · [pyttsx3](https://pypi.org/project/pyttsx3/) |
+
+`discussion-helper`'s own row is read off this repository rather than asserted.
+*Barge-in discards queued audio* is
+`tests/test_the_floor.py::test_what_was_queued_and_not_heard_is_discarded`,
+which stages an interruption into a five-sentence reply and requires that the
+sentence it landed on is counted as started and not as said, with the four
+after it never starting; the companion
+`test_the_interruption_is_fast` holds the whole stop under 150 ms against a
+one-second sentence. *Testable with no hardware* is the suite itself, which
+runs with no microphone, no model and no sound card. *Per-stage latency
+breakdown* is `TurnTiming.as_dict()` — the same six fields the CLI's `--json`
+and the HTTP event stream report. The ⭐ on *Telephony and scale* is measured
+in the only sense available: there is no code here for either.
+
+The published figures this package was designed against — the 800 ms budget,
+the 150 ms barge-in bar, the reported 39 % drop in false interruptions when
+semantic end-of-turn is fused with VAD — are other people's numbers, and each
+is cited individually in
+[KNOWLEDGE.md § Sources](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md#sources).
+They are not re-derived here.
