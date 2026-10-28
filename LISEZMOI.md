@@ -42,6 +42,10 @@ son. Ce n'est pas de la coquetterie — la gestion de l'interruption est
 précisément ce qu'une vraie pièce rend impossible à vérifier. On ne peut pas
 *entendre* si la file d'attente a bien été jetée.
 
+## Comment ça marche
+
+![Comment discussion-helper fonctionne : la boucle qui écoute, répond puis parle — et s'arrête dès que vous coupez](https://raw.githubusercontent.com/warith-harchaoui/discussion-helper/main/assets/diagrams/comment-ca-marche.png)
+
 ## Installation
 
 ```bash

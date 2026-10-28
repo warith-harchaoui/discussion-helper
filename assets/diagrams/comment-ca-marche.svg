@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1288 432" width="1288" height="432" role="img" aria-labelledby="dh-title dh-desc" font-family="Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="dh-title">Comment discussion-helper fonctionne : la boucle qui écoute, répond puis parle — et s'arrête dès que vous coupez</title>
+  <desc id="dh-desc">Une plaque de gauche à droite, le seul membre qui soit une boucle plutôt qu'une chaîne. Entrée : une personne qui parle. Le travail, en trois étapes numérotées : vocal-helper entend, transformant le micro en tours transcrits ; un modèle de langue local répond, sans aucun appel au nuage ; speaker-helper dit la réponse. Par-dessus les trois tourne ce qui en fait une conversation plutôt qu'une paire d'outils : la gestion de la parole, qui décide à qui est le tour, l'interruption, qui coupe la réponse dès que l'utilisateur reprend, puis un budget de latence qui garde le silence assez court.</desc>
+  <style>
+    .panel      { fill: #ffffff; stroke: #d6d6d6; stroke-width: 1.5; }
+    .panel-label{ fill: #6b6b6b; font-size: 13px; font-weight: 600; letter-spacing: .08em; }
+    .io         { fill: #F8F8F8; stroke: #9a9a9a; stroke-width: 1.5; }
+    .stage      { fill: #FFF4E0; stroke: #FF9500; stroke-width: 1.5; }
+    .core       { fill: #007AFF; stroke: #0062CC; stroke-width: 1.5; }
+    .surface    { fill: #EAF3FF; stroke: #007AFF; stroke-width: 1.5; }
+    .n-title    { font-size: 15px; font-weight: 600; fill: #111111; }
+    .n-sub      { font-size: 12px; fill: #5a5a5a; }
+    .on-dark    { fill: #ffffff; font-size: 15px; font-weight: 600; }
+    .on-dark-sub{ fill: #d8e8ff; font-size: 12px; }
+    .flow       { fill: none; stroke: #9a9a9a; stroke-width: 2; }
+    .tie        { fill: none; stroke: #007AFF; stroke-width: 1.5; }
+    .caption    { font-size: 12.5px; fill: #5a5a5a; font-style: italic; }
+    .step       { font-size: 11px; font-weight: 700; fill: #B26A00;
+                  font-family: 'Roboto Mono', ui-monospace, monospace; }
+    .surf-label { font-size: 13px; font-weight: 600; fill: #0062CC; }
+
+    @media (prefers-color-scheme: dark) {
+      .panel      { fill: #1b1b1d; stroke: #3a3a3d; }
+      .panel-label{ fill: #a0a0a6; }
+      .io         { fill: #2a2a2e; stroke: #6f6f76; }
+      .stage      { fill: #3a2d12; stroke: #FF9500; }
+      .surface    { fill: #10243d; stroke: #4da2ff; }
+      .n-title    { fill: #f2f2f4; }
+      .n-sub      { fill: #b4b4ba; }
+      .flow       { stroke: #7a7a82; }
+      .tie        { stroke: #4da2ff; }
+      .caption    { fill: #a0a0a6; }
+      .step       { fill: #FFCC00; }
+      .surf-label { fill: #4da2ff; }
+    }
+  </style>
+  <defs><marker id="ah-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9a9a9a"/></marker></defs>
+  <text class="panel-label" x="28" y="40">ENTRÉE</text>
+  <rect class="io" x="28" y="87" width="224" height="78" rx="10"/>
+  <text class="n-title" x="140" y="120" text-anchor="middle">une personne qui parle</text>
+  <text class="n-sub" x="140" y="139" text-anchor="middle">dans le micro</text>
+  <path class="flow" d="M258 126 H274" marker-end="url(#ah-arrow)"/>
+  <rect class="panel" x="278" y="54" width="746" height="144" rx="12"/>
+  <text class="panel-label" x="298" y="76">CE QU'ELLE FAIT</text>
+  <rect class="stage" x="298" y="94" width="237" height="78" rx="10"/>
+  <text class="n-title" x="416" y="127" text-anchor="middle">entendre</text>
+  <text class="n-sub" x="416" y="146" text-anchor="middle">vocal-helper : tours transcrits</text>
+  <text class="step" x="309" y="110">1</text>
+  <path class="flow" d="M538 133 H554" marker-end="url(#ah-arrow)"/>
+  <rect class="stage" x="560" y="94" width="193" height="78" rx="10"/>
+  <text class="n-title" x="657" y="127" text-anchor="middle">répondre</text>
+  <text class="n-sub" x="657" y="146" text-anchor="middle">un LLM local, sans nuage</text>
+  <text class="step" x="571" y="110">2</text>
+  <path class="flow" d="M758 133 H774" marker-end="url(#ah-arrow)"/>
+  <rect class="stage" x="780" y="94" width="224" height="78" rx="10"/>
+  <text class="n-title" x="891" y="127" text-anchor="middle">parler</text>
+  <text class="n-sub" x="891" y="146" text-anchor="middle">speaker-helper, interruptible</text>
+  <text class="step" x="791" y="110">3</text>
+  <path class="flow" d="M1029 126 H1045" marker-end="url(#ah-arrow)"/>
+  <text class="panel-label" x="1049" y="40">SORTIE</text>
+  <rect class="io" x="1049" y="87" width="211" height="78" rx="10"/>
+  <text class="n-title" x="1155" y="120" text-anchor="middle">une réponse parlée</text>
+  <text class="n-sub" x="1155" y="139" text-anchor="middle">qui s'arrête si vous coupez</text>
+  <rect class="core" x="434" y="232" width="420" height="54" rx="10"/>
+  <text class="on-dark" x="644" y="253" text-anchor="middle">une bibliothèque, appelée pareil partout</text>
+  <text class="on-dark-sub" x="644" y="272" text-anchor="middle">os-helper dessous pour la journalisation et les fichiers</text>
+  <path class="tie" d="M644 286 V314 H380 V332"/>
+  <path class="tie" d="M644 314 H908 V332"/>
+  <path class="tie" d="M380 314 V332"/>
+  <rect class="surface" x="305" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="380" y="360" text-anchor="middle">API Python</text>
+  <path class="tie" d="M556 314 V332"/>
+  <rect class="surface" x="481" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="556" y="360" text-anchor="middle">CLI (click)</text>
+  <path class="tie" d="M732 314 V332"/>
+  <rect class="surface" x="657" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="732" y="360" text-anchor="middle">FastAPI + MCP</text>
+  <path class="tie" d="M908 314 V332"/>
+  <rect class="surface" x="833" y="332" width="150" height="46" rx="9"/>
+  <text class="surf-label" x="908" y="360" text-anchor="middle">skill d'agent</text>
+  <text class="caption" x="644" y="412" text-anchor="middle">La gestion de la parole, l'interruption puis le budget de latence sont le paquet : les trois étapes existaient déjà comme helpers séparés.</text>
+</svg>

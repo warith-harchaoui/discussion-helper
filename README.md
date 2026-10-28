@@ -40,6 +40,10 @@ tidiness: interruption handling is exactly the behaviour a real room makes
 impossible to assert. You cannot *hear* whether the queued audio was
 discarded.
 
+## How it works
+
+![How discussion-helper works: the loop that listens, answers and speaks — and stops the moment you cut in](https://raw.githubusercontent.com/warith-harchaoui/discussion-helper/main/assets/diagrams/how-it-works.png)
+
 ## Installation
 
 ```bash
