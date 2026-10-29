@@ -168,3 +168,15 @@ semantic end-of-turn is fused with VAD — are other people's numbers, and each
 is cited individually in
 [KNOWLEDGE.md § Sources](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md#sources).
 They are not re-derived here.
+
+## Ideas worth stealing
+
+Researched rather than guessed: what each neighbour does better, and what this library would have to change to match it. Nothing here is a commitment — it is the reading list the next version starts from.
+
+- **`LiveKit Agents` — a turn detector that listens to the audio, not the transcript** — Deciding the user has finished from the text alone arrives a transcription-latency too late and mistakes a pause for an ending. An audio-based detector is the single change that makes a spoken loop feel like a conversation.
+
+- **`LiveKit Agents` — roll back the interrupted LLM turn, do not just stop the voice** — When VAD fires on the caller while the agent is speaking, cancelling TTS is the obvious half. The half that is usually missed is rolling the interrupted turn out of the history, so the model is not later convinced it said a sentence the user never heard.
+
+- **`Pipecat` — Smart Turn, an open end-of-turn model** — An openly available turn-detection model, rather than a silence threshold tuned by hand. A fixed timeout is wrong in both directions: it clips a thinking speaker and lags a decisive one.
+
+- **`LiveKit Agents` — built-in testing and simulation** — A conversational loop is the hardest thing in this suite to regression-test, and this is the only neighbour that ships an answer. Scripted sessions replayed against the pipeline would catch a turn-taking regression that no unit test reaches.

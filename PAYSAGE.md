@@ -177,3 +177,15 @@ d'activité vocale — appartiennent à d'autres ; chacun est cité individuelle
 dans
 [KNOWLEDGE.md § Sources](https://github.com/warith-harchaoui/discussion-helper/blob/main/KNOWLEDGE.md#sources).
 Ils ne sont pas refaits ici.
+
+## Idées à reprendre
+
+Étudié plutôt que deviné : ce que chaque voisin fait mieux, puis ce que cette bibliothèque devrait changer pour l'égaler. Rien ici n'est un engagement : c'est la liste de lecture dont part la version suivante.
+
+- **`LiveKit Agents` — un détecteur de tour qui écoute l'audio, pas la transcription** — Décider que l'utilisateur a fini depuis le seul texte arrive une latence de transcription trop tard puis prend une pause pour une fin. Un détecteur fondé sur l'audio est le seul changement qui fait qu'une boucle parlée ressemble à une conversation.
+
+- **`LiveKit Agents` — défaire le tour de LLM interrompu, pas seulement couper la voix** — Quand la VAD se déclenche sur l'appelant pendant que l'agent parle, annuler la synthèse est la moitié évidente. Celle qu'on oublie est de retirer le tour interrompu de l'historique, afin que le modèle ne soit pas ensuite convaincu d'avoir dit une phrase que l'utilisateur n'a jamais entendue.
+
+- **`Pipecat` — Smart Turn, un modèle ouvert de fin de tour** — Un modèle de détection de tour librement disponible, plutôt qu'un seuil de silence réglé à la main. Un délai fixe se trompe dans les deux sens : il coupe celui qui réfléchit puis traîne derrière celui qui tranche.
+
+- **`LiveKit Agents` — des tests avec de la simulation intégrés** — Une boucle conversationnelle est la chose la plus difficile à tester en non-régression de toute la suite ; c'est le seul voisin qui livre une réponse. Des sessions scriptées rejouées contre le pipeline attraperaient une régression de prise de tour qu'aucun test unitaire n'atteint.
