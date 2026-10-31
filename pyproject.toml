@@ -35,7 +35,7 @@ dependencies = [
     # package reads — `init_logging`, `warning`, `Prompts` — are all still
     # exported there, and none of them was ever reached through the shell.
     # The floor stays at 2.9.0, where `Prompts` landed.
-    "os-helper>=2.9.0,<4",
+    "os-helper>=2.9.0,<5",
     # `discussion-helper` — the headline command, the one the README tells you
     # to run — is built with click, and it is the only command line this
     # package has. Until 0.1.0 click was declared nowhere: not a dependency,
