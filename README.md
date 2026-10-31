@@ -175,14 +175,14 @@ discussion-helper-mcp            # or: uvicorn discussion_helper.api:build --fac
 | `POST /turn` | one exchange, no audio — the shape an agent can use |
 | `/mcp` | the same routes as agent tools |
 
-The WebSocket carries real audio both ways: the client sends PCM and control
-frames, the server sends events and WAV. That is how every hosted voice agent
-works, and it means the browser can hold the microphone while this end holds
-the model. Two duties fall on the client and are not optional — send
-`{"type":"speaking"}` on the **first syllable** so a barge-in can travel, and
-**drop** buffered audio on `{"kind":"stop"}`. A client that plays its buffer
-out reproduces, at the far end, exactly the deafness that stopping it here
-was meant to prevent.
+The WebSocket carries real audio both ways: the client sends PCM and control frames, the server sends events and WAV. That is how every hosted voice agent works, and it means the browser can hold the microphone while this end holds the model.
+
+Two duties fall on the client, and neither is optional:
+
+- send `{"type":"speaking"}` on the **first syllable**, so a barge-in can travel;
+- **drop** buffered audio on `{"kind":"stop"}`.
+
+A client that plays its buffer out reproduces, at the far end, exactly the deafness that stopping it here was meant to prevent.
 
 ### In a container
 
@@ -191,13 +191,9 @@ docker compose up -d
 curl -s localhost:8090/health
 ```
 
-The image serves the **remote** transport — the caller owns the microphone and
-sends frames — and that is the honest half of this package a container can
-run. It does **not** open a microphone of its own: `--transport local` reads
-the machine's sound card, and a container has none. Passing one in is
-`--device /dev/snd` on Linux and impossible on macOS, which is a per-machine
-arrangement rather than an image, so the `listen` extra is deliberately left
-out and the refusal happens at install time instead of at the first call.
+The image serves the **remote** transport — the caller owns the microphone and sends frames — and that is the honest half of this package a container can run.
+
+It does **not** open a microphone of its own. `--transport local` reads the machine's sound card, and a container has none. Passing one in is `--device /dev/snd` on Linux and impossible on macOS, which is a per-machine arrangement rather than an image. So the `listen` extra is deliberately left out, and the refusal happens at install time instead of at the first call.
 
 The port is bound to the loopback, and the reason is in `discussion-helper-mcp
 --help` as well: this server can open a microphone. One worker, also

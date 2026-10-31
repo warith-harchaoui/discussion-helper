@@ -181,15 +181,14 @@ discussion-helper-mcp            # ou : uvicorn discussion_helper.api:build --fa
 | `POST /turn` | un échange, sans audio — la forme qu'un agent peut utiliser |
 | `/mcp` | les mêmes routes en outils d'agent |
 
-La WebSocket porte de l'audio réel dans les deux sens : le client envoie du
-PCM et des trames de contrôle, le serveur renvoie des événements et du WAV.
-C'est ainsi que fonctionne tout agent vocal hébergé ; cela veut dire que le
-navigateur peut tenir le micro pendant que ce bout tient le modèle. Deux
-devoirs incombent au client et ne sont pas facultatifs — envoyer
-`{"type":"speaking"}` à la **première syllabe** pour qu'une coupure puisse
-voyager, puis **jeter** l'audio tamponné sur `{"kind":"stop"}`. Un client qui
-joue son tampon jusqu'au bout reproduit, à l'autre bout, exactement la surdité
-que l'arrêter ici devait empêcher.
+La WebSocket porte de l'audio réel dans les deux sens : le client envoie du PCM avec des trames de contrôle, le serveur renvoie des événements puis du WAV. C'est ainsi que fonctionne tout agent vocal hébergé, ce qui veut dire que le navigateur peut tenir le micro pendant que ce bout tient le modèle.
+
+Deux devoirs incombent au client, dont aucun n'est facultatif :
+
+- envoyer `{"type":"speaking"}` à la **première syllabe**, pour qu'une coupure puisse voyager ;
+- **jeter** l'audio tamponné sur `{"kind":"stop"}`.
+
+Un client qui joue son tampon jusqu'au bout reproduit, à l'autre bout, exactement la surdité que l'arrêter ici devait empêcher.
 
 ### Dans un conteneur
 
@@ -198,14 +197,9 @@ docker compose up -d
 curl -s localhost:8090/health
 ```
 
-L'image sert le transport **distant** — c'est l'appelant qui tient le micro et
-envoie les trames — et c'est la moitié de ce paquet qu'un conteneur peut
-honnêtement faire tourner. Elle n'ouvre **pas** de micro : `--transport local`
-lit la carte son de la machine ; un conteneur n'en a pas. En passer une, ce
-sont des `--device /dev/snd` sous Linux et rien du tout sous macOS — un
-arrangement par machine, pas une image. L'extra `listen` est donc
-volontairement absent ; le refus arrive à l'installation plutôt qu'au
-premier appel.
+L'image sert le transport **distant** — c'est l'appelant qui tient le micro puis envoie les trames — et c'est la moitié de ce paquet qu'un conteneur peut honnêtement faire tourner.
+
+Elle n'ouvre **pas** de micro. `--transport local` lit la carte son de la machine ; un conteneur n'en a pas. En passer une, ce sont des `--device /dev/snd` sous Linux puis rien du tout sous macOS — un arrangement par machine, pas une image. L'extra `listen` est donc volontairement absent, puis le refus arrive à l'installation plutôt qu'au premier appel.
 
 Le port est lié à la boucle locale ; la raison est aussi dans
 `discussion-helper-mcp --help` : ce serveur peut ouvrir un micro. Un seul
