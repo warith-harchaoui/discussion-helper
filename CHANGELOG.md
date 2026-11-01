@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## v0.4.2 (2026-11-01): the published ceiling lets os-helper 4 through
+
+### Fixed
+
+- **The published metadata capped `os-helper<4`, so nobody installing from the
+  index could reach 4.0.0.** The ceiling was raised in this repository on
+  2026-10-31, but a wheel's `Requires-Dist` is frozen at upload: until this
+  release a fresh resolve still pulled os-helper 3.1.0 and the raised ceiling
+  reached no installer at all. This release is what carries the `<5` to the
+  index. This package never calls `hashfile` or `hashfolder`, the two functions whose
+  contract 4.0.0 tightened, so the ceiling was the only thing in the way.
+
 ### Documentation
 
 - **The six documents now carry the suite spine** (CODING.md 16–18). The
