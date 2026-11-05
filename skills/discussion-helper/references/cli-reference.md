@@ -65,7 +65,7 @@ capture-helper), `[think]` (best-engine-ai-helper), `[speak]` (speaker-helper),
 | Option | Effect |
 |---|---|
 | `--voice TEXT` | Voice to read with, e.g. `ff_siwis`. |
-| `--language TEXT` | Language hint; empty lets the recogniser detect. |
+| `--language TEXT` | Language hint. Named, whisper.cpp transcribes; empty, Nemotron 3.5 detects and transcribes (a 669 MB download the first time). |
 | `--device TEXT` | Microphone name substring. |
 | `--silence-timeout SECONDS` | Give up after this much silence. |
 | `--max-sentences INTEGER` | Cap on reply length; `0` is none. |

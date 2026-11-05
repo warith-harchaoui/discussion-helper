@@ -70,7 +70,9 @@ construction and therefore invisible in a log.
   Headphones confirm the diagnosis in ten seconds. Raise `--grace`, or use
   `--no-barge-in` on a speakerphone.
 - **It answers half a question.** Endpointing fired early. That lives in
-  `vocal-helper`'s semantic end-of-turn stage, not here.
+  `vocal-helper`, not here: `VocalListener` ends a turn on VAD silence and
+  leaves vocal-helper's semantic end-of-turn stage off (`eot=None`), which a
+  `Listener` of your own can turn on.
 - **It talks for ninety seconds.** A prompt problem that becomes a latency
   problem, because the user then *has* to interrupt. `--max-sentences` is a
   backstop, not a fix.

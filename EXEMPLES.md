@@ -439,6 +439,17 @@ arriverait une seconde trop tard ; d'ici là l'agent parle par-dessus
 quelqu'un depuis une phrase entière. `onset_rms` règle le détecteur de début
 pour une pièce bruyante.
 
+La reconnaissance suit la règle de vocal-helper 4 : une langue nommée
+(`language="fr"`) part chez whisper.cpp, une langue vide chez Nemotron 3.5, que
+vocal-helper a mesuré plus rapide et plus juste que whisper en direct. La
+première conversation sans langue télécharge son graphe, 669 Mo, une fois pour
+toutes. La rediarisation du tampon entier, active par défaut dans vocal-helper 4,
+reste éteinte (`growing=None`) : elle coûte 2,6 à 3,3 fois la durée de l'audio
+pour réviser des étiquettes de locuteur que cette boucle ne lit jamais, puisque
+chaque tour est « user ». `pipeline_options(language)` dans
+`discussion_helper.adapters` rend exactement les mots-clés de `PipelineConfig`
+qu'envoie l'écouteur.
+
 ## 11. HTTP et un agent qui peut interrompre
 
 ```bash

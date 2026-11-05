@@ -290,7 +290,9 @@ pre-scanned.
 
 **The agent answers a sentence the user did not finish.** Endpointing fired
 early. Lengthen the commit delay, or enable semantic end-of-turn, which is
-what it is for.
+what it is for. `VocalListener` leaves it off (`eot=None`, an LLM hop per
+voiced segment), so turning it on means a `Listener` of your own over a
+`voh.Pipeline` configured with it.
 
 **The agent interrupts itself one syllable in.** Echo. See §4. Headphones will
 confirm the diagnosis in ten seconds.
@@ -313,7 +315,9 @@ not a fix.
 
 - **No wake word.** A different problem, with different models.
 - **No speaker diarization.** `vocal-helper` has it; a two-party conversation
-  with an open microphone does not need it.
+  with an open microphone does not need it. The listener even turns off the
+  whole-buffer re-diarization vocal-helper 4 runs by default (`growing=None`):
+  it costs 2.6 to 3.3 times the audio to revise labels this loop never reads.
 - **No telephony.** SIP, WebRTC and jitter buffers are a separate world.
 - **No acoustic echo cancellation.** It belongs in the capture path, i.e. in
   `capture-helper`, not in a loop that never sees a sample. This package

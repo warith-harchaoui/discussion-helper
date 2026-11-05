@@ -14,6 +14,8 @@ hardware first; the room is the slowest possible way to test a state machine.
 skills/discussion-helper/
 ├── SKILL.md                 # name + trigger-rich description + instructions
 └── references/
+    ├── cli-reference.md     # every option of `rehearse` and `talk`
+    ├── surfaces.md          # library, HTTP, MCP
     └── triggers.md          # when this is the answer, and when it is not
 ```
 

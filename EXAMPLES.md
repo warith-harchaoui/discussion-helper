@@ -429,6 +429,16 @@ waited for a transcript would arrive a second late, by which time the agent has
 been talking over somebody for a whole sentence. `onset_rms` tunes the onset
 detector for a noisy room.
 
+The recogniser follows vocal-helper 4's rule: a language you name
+(`language="fr"`) goes to whisper.cpp, an empty one to Nemotron 3.5, which
+vocal-helper measured both faster and closer than whisper live. The first
+conversation without a language downloads its graph, 669 MB, once. The
+whole-buffer re-diarization vocal-helper 4 runs by default stays off
+(`growing=None`): it costs 2.6 to 3.3 times the audio to revise speaker labels
+this loop never reads, since every turn is "user". `pipeline_options(language)`
+in `discussion_helper.adapters` returns exactly the `PipelineConfig` keywords
+the listener sends.
+
 ## 11. HTTP, and an agent that can interrupt
 
 ```bash

@@ -57,6 +57,11 @@ On Linux and macOS the voice also needs `espeak-ng`
 Each half installs on its own if you only want some of it: `[listen]`,
 `[think]`, `[speak]`, `[play]`.
 
+`[listen]` is vocal-helper 4. Name the language (`talk --language fr`) and
+whisper.cpp transcribes; leave it out and Nemotron 3.5 does, measured by
+vocal-helper both faster and closer than whisper live. The first conversation
+without a language downloads that graph, 669 MB, once.
+
 ## Quick start
 
 The loop runs on a bare install — no model, no microphone, no sound card. The
