@@ -26,6 +26,8 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # By hand when GitHub accepts a push but drops its event (seen 2026-11-05).
+  workflow_dispatch:
 
 # A burst of pushes to the same branch should cost one run, not one per commit.
 concurrency:
