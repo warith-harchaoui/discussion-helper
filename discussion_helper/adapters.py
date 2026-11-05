@@ -56,6 +56,45 @@ def split_sentences(text: str) -> list[str]:
     return [part for part in parts if part]
 
 
+def pipeline_options(language: str = "") -> dict[str, object]:
+    """The `voh.PipelineConfig` keywords a voice loop needs, and no more.
+
+    Kept apart from :class:`VocalListener` so a test can hand them to the real
+    `PipelineConfig`: the listener's own test fakes vocal-helper, and a fake that
+    swallows any keyword would let a renamed one through.
+
+    Parameters
+    ----------
+    language : str
+        Language code; empty lets the recogniser discover it.
+
+    Returns
+    -------
+    dict
+        Keyword arguments for `voh.PipelineConfig`.
+    """
+    return {
+        # "" means "let the recogniser decide", spelled "auto". With the engine
+        # left to vocal-helper's `auto`, that sends an unknown language to
+        # Nemotron 3.5 segment by segment, which vocal-helper measured both
+        # faster and closer than whisper live on all eight AMI meetings (RTF
+        # 0.05-0.12 against 0.17-0.29); a given language goes to whisper.
+        "asr": {"language": language or "auto"},
+        # Off. vocal-helper 4 re-diarizes the whole buffer by default, at 2.6
+        # to 3.3 times the audio, to revise speaker labels after the fact. This
+        # loop labels every turn "user" and can take nothing back once it has
+        # answered, so it would pay that cost for labels it never reads. None
+        # keeps the per-segment online stage alone, the 3.x live path.
+        "growing": None,
+        # Both off. The LLM analyst keeps a rolling summary this package has no
+        # use for — it brings its own responder — and semantic end-of-turn buys
+        # ~39 % fewer mid-sentence breaks at the price of an LLM hop per voiced
+        # segment, which is the one currency a voice loop cannot spend.
+        "llm": None,
+        "eot": None,
+    }
+
+
 class VocalListener:
     """Hears, through ``vocal-helper`` and the microphone ``capture-helper`` opens.
 
@@ -152,19 +191,7 @@ class VocalListener:
 
         pipeline = voh.Pipeline(
             source=_tapped_microphone,
-            config=voh.PipelineConfig(
-                # "" means "let the recogniser decide", which whisper spells
-                # "auto".
-                asr={"language": self.language or "auto"},
-                # Both default to None, i.e. off, and both stay off. The LLM
-                # analyst keeps a rolling summary this package has no use for —
-                # it brings its own responder — and semantic end-of-turn buys
-                # ~39 % fewer mid-sentence breaks at the price of an LLM hop per
-                # voiced segment, which is the one currency a voice loop cannot
-                # spend.
-                llm=None,
-                eot=None,
-            ),
+            config=voh.PipelineConfig(**pipeline_options(self.language)),
         )
         self._pipeline = pipeline
 

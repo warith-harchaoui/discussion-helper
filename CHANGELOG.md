@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## v0.5.0 (2026-11-05): listening moves to vocal-helper 4
+
+### Changed
+
+- **`[listen]` requires `vocal-helper>=4.0.0,<5`.** The ceiling was `<4`, which
+  kept every install on 3.3.2. The floor is 4.0.0 because the listener now
+  passes `growing=None`, a keyword 4.0.0 introduced.
+- **The whole-buffer re-diarization vocal-helper 4 enables by default stays
+  off.** It costs 2.6 to 3.3 times the audio to revise speaker labels after the
+  fact; this loop labels every turn "user" and cannot take back an answer, so it
+  would pay for labels it never reads. The per-segment online stage alone runs,
+  as in 3.x.
+- **An unknown language now goes to Nemotron 3.5, a given one to whisper**:
+  vocal-helper 4's own `auto` rule, kept on purpose. Live, segment by segment,
+  vocal-helper measured Nemotron faster and closer than whisper on all eight AMI
+  meetings (real-time factor 0.05-0.12 against 0.17-0.29). The first
+  conversation downloads its 669 MB graph.
+
+### Added
+
+- **`pipeline_options(language)`**, the `PipelineConfig` keywords the listener
+  sends, and `tests/test_vocal_helper_contract.py`, which hands them to the real
+  vocal-helper. The listener's own test fakes a `PipelineConfig` that accepts any
+  keyword, so a renamed one could pass it unnoticed. The new test skips where
+  `[listen]` is absent (CI) and runs in the pre-push gate. Checked live on a
+  60 s AMI clip: 15 turns transcribed in real time.
+
 ## v0.4.2 (2026-11-01): the published ceiling lets os-helper 4 through
 
 ### Fixed
