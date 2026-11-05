@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discussion-helper"
-version = "0.5.0"
+version = "0.5.1"
 description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -70,7 +70,12 @@ listen = [
     # live, as measured there. `tests/test_vocal_helper_contract.py` builds
     # the real `PipelineConfig` from these options, so a renamed keyword
     # fails here before it fails in a conversation.
-    "vocal-helper>=4.0.0,<5",
+    #
+    # The floor is now 5.0.0: 4.0.0 pins the digest of a bundle that was never
+    # served, so on a fresh install it cannot fetch its diarization bundle at
+    # all. No lower floor installs a listener that works. 5.0.0's own default
+    # change, the live diarization latency, does not reach this adapter.
+    "vocal-helper>=5.0.0,<6",
     # Not imported here: it is what vocal-helper's microphone source opens.
     # Declared anyway, and at its real major, so `[listen]` resolves to a
     # combination that has been run rather than one that merely solves.

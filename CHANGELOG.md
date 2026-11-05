@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## v0.5.1 (2026-11-05): listening requires vocal-helper 5, since 4.0.0 cannot install its bundle
+
+### Changed
+
+- **`[listen]` requires `vocal-helper>=5.0.0,<6`.** vocal-helper 4.0.0 pins the
+  sha256 of a diarization bundle that was never served, so a fresh install
+  cannot fetch the bundle and the listener cannot start; no floor below 5.0.0
+  is sound. 5.0.0 changes one default, the live diarization latency, which
+  this loop does not depend on: it passes `growing=None` and reads no speaker
+  label. The adapter itself is unchanged.
+
 ## v0.5.0 (2026-11-05): listening moves to vocal-helper 4
 
 ### Changed

@@ -37,7 +37,7 @@ and nothing else:
 `discussion_helper.testing` ships the fakes the test suite uses, and they are
 public for the same reason: `ScriptedListener`, `EchoResponder`, `SilentVoice`.
 
-`VocalListener` needs vocal-helper 4 (`[listen]` pins `>=4.0.0,<5`).
+`VocalListener` needs vocal-helper 5 (`[listen]` pins `>=5.0.0,<6`).
 `discussion_helper.adapters.pipeline_options(language)` returns the
 `PipelineConfig` keywords it sends: the language (`"auto"` when empty, which
 vocal-helper routes to Nemotron 3.5, a 669 MB download the first time; a named

@@ -59,7 +59,7 @@ Sous Linux et macOS il faut aussi `espeak-ng` (`apt install espeak-ng`,
 Chaque moitié s'installe seule si vous n'en voulez qu'une partie : `[listen]`,
 `[think]`, `[speak]`, `[play]`.
 
-`[listen]`, c'est vocal-helper 4. Nommez la langue (`talk --language fr`) et
+`[listen]`, c'est vocal-helper 5. Nommez la langue (`talk --language fr`) et
 whisper.cpp transcrit ; sans elle, c'est Nemotron 3.5, que vocal-helper a mesuré
 plus rapide et plus juste que whisper en direct. La première conversation sans
 langue télécharge ce graphe, 669 Mo, une fois pour toutes.

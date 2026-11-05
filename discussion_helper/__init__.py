@@ -43,7 +43,7 @@ Warith HARCHAOUI — https://linkedin.com/in/warith-harchaoui
 
 from __future__ import annotations
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 __author__ = "Warith HARCHAOUI"
 __email__ = "warithmetics@deraison.ai"
 __license__ = "BSD-3-Clause"
