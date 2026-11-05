@@ -101,7 +101,8 @@ class VocalListener:
     The two questions in the :class:`~discussion_helper.parts.Listener`
     protocol are answered by two different parts of that pipeline, and keeping
     them apart is the point: completed turns come from the end of it (VAD, then
-    semantic end-of-turn, then recognition), while "is somebody talking right
+    recognition; semantic end-of-turn stays off, see :func:`pipeline_options`),
+    while "is somebody talking right
     now" comes from the VAD stage alone. A barge-in that waited for a
     transcript would arrive a second late — by which time the agent has been
     talking over the user for a sentence.
