@@ -1,5 +1,15 @@
 # Changelog: discussion-helper
 
+## [Unreleased]
+
+## [0.5.2] - 2026-11-15
+
+### Changed
+
+- **No upper bound on Python any more.** `requires-python` was capped at
+  `>=3.10,<3.14` with no recorded reason, which refused every newer Python at install
+  time; it is now `>=3.10`. Badges and prerequisites say "Python 3.10 or later".
+
 ## Unreleased
 
 ## v0.5.1 (2026-11-05): listening requires vocal-helper 5, since 4.0.0 cannot install its bundle

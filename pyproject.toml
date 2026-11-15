@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discussion-helper"
-version = "0.5.1"
+version = "0.5.2"
 description = "Hold a spoken conversation: listen, answer, speak — and stop the moment the user cuts in. The loop over vocal-helper (hearing), a local language model (answering) and speaker-helper (speaking), with the floor, barge-in and the latency budget handled properly."
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 authors = [{ name = "Warith HARCHAOUI", email = "warithmetics@deraison.ai" }]
