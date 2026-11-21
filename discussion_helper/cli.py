@@ -94,7 +94,9 @@ def _common(function: _Command) -> _Command:
         "  discussion-helper talk --no-barge-in             # strict half-duplex\n"
         "\n"
         "KNOWLEDGE.md explains the latency budget, turn detection and why echo\n"
-        "decides your defaults."
+        "decides your defaults.\n"
+        "\n"
+        "⭐️ on GitHub: https://github.com/warith-harchaoui/discussion-helper"
     ),
 )
 # Read from the package, not from the installed distribution's metadata.

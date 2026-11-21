@@ -12,6 +12,8 @@
 **Tenir une conversation parlée au micro : écouter, répondre, parler — et se
 taire à l'instant où l'on vous coupe.**
 
+Laissez une [⭐️](https://github.com/warith-harchaoui/discussion-helper) sur GitHub si mon aide le mérite.
+
 `vocal-helper` entend. `speaker-helper` parle. Un modèle local répond, choisi
 par `best-engine-ai-helper`, qui mesure la machine : aucun nom de modèle n'est
 écrit ici. Aucun des trois ne sait à qui est le tour. Ce paquet est la boucle

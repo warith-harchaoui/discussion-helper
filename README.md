@@ -12,6 +12,8 @@ developed for building Artificial Intelligence.
 **Hold a spoken conversation at the microphone: listen, answer, speak — and
 stop the moment the user cuts in.**
 
+Drop a [⭐️](https://github.com/warith-harchaoui/discussion-helper) on GitHub if my help deserves it.
+
 `vocal-helper` hears. `speaker-helper` speaks. A local language model answers,
 chosen by `best-engine-ai-helper`, which sizes the machine — no model name is
 written down here. None of the three knows whose turn it is. This package is
