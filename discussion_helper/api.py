@@ -41,6 +41,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
@@ -57,6 +58,8 @@ except ImportError as exc:  # pragma: no cover - dependency guard
 
 from discussion_helper.discussion import Policy
 from discussion_helper.session import Session, Sessions
+
+logger = logging.getLogger(__name__)
 
 
 class StartRequest(BaseModel):
@@ -516,9 +519,7 @@ def _mount_mcp(app: FastAPI) -> None:
         else:  # pragma: no cover - legacy fastapi-mcp
             server.mount()
     except Exception as exc:  # pragma: no cover - version-pairing guard
-        import os_helper as osh
-
-        osh.warning(
+        logger.warning(
             f"MCP surface not mounted ({type(exc).__name__}: {exc}). The HTTP "
             f"API is unaffected; `pip install 'discussion-helper[mcp]'` "
             f"installs a pairing known to work."
